@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# Copyright 2020 Canonical Ltd
+
+# This is a weird script to be able to invoke metrics/scripts/__main__.py as a
+# normal executable, for testing mainly.
+
+set -e
+
+ABSPATH="$(realpath -e -s ${0})"
+PARENT="$(dirname $(dirname ${ABSPATH}))"
+SCRIPT="$(basename ${ABSPATH})"
+
+SCRIPT="${SCRIPT//-/_}"
+
+pushd "${PARENT}" >/dev/null
+
+python3 -m "metrics.collectors.${SCRIPT}" "$@"

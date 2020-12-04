@@ -1,5 +1,3 @@
-#!/usr/bin/python3
-
 # Copyright 2020 Canonical Ltd
 
 import json
@@ -8,8 +6,8 @@ import sys
 
 from collections import defaultdict
 from distro_info import UbuntuDistroInfo as UDI
-from metrics.basemetric import Metric
-from metrics.ubunturelease import UbuntuRelease
+from metrics.lib.basemetric import Metric
+from metrics.lib.ubunturelease import UbuntuRelease
 
 INCOMING_URL_PATTERN = (
     "https://reqorts.qa.ubuntu.com/reports/rls-mgr/rls-{}-incoming.json"
@@ -77,11 +75,3 @@ class ReleaseBugsMetrics(Metric):
                     )
 
         return data
-
-
-if __name__ == "__main__":
-    try:
-        metrics = ReleaseBugsMetrics()
-        metrics.run()
-    except ValueError:
-        sys.exit(1)

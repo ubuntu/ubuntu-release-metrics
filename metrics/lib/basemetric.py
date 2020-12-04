@@ -5,6 +5,7 @@ import logging
 import os
 
 from influxdb import InfluxDBClient
+from metrics.lib.errors import CollectorError
 
 
 class Metric:
@@ -46,7 +47,7 @@ class Metric:
                 database = os.environ["INFLUXDB_DATABASE"]
             except KeyError as e:
                 self.log.error(f"Make sure {e} is set in the environment.")
-                raise ValueError
+                raise CollectorError(f"Variable {e} not set") from e
 
             self.log.debug(f"Connecting to influxdb at {hostname}:{port}...")
 
