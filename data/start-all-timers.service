@@ -1,0 +1,6 @@
+[Unit]
+Description=Start all of the metric collector timers
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/systemctl start --all 'run-metric-collector@*.timer'

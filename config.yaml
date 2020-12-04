@@ -2,7 +2,20 @@
 # See LICENSE file for licensing details.
 
 options:
-  influxdb-host:
+  influxdb-hostname:
     default: ""
     description: The hostname of the remote influxdb to submit metrics to
     type: string
+  influxdb-port:
+    default: 8086
+    description: The port of the remote influxdb to submit metrics to
+    type: int
+  influxdb-username:
+    default: ""
+    description: The influxdb username
+  influxdb-password:
+    default: ""
+    description: The influxdb password
+  influxdb-database:
+    default: ""
+    description: The influxdb database to use

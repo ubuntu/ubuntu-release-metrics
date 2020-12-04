@@ -1,0 +1,25 @@
+[Unit]
+Description=Run %I metric
+After=pull-metrics.service
+Wants=pull-metrics.service
+
+[Service]
+DynamicUser=yes
+EnvironmentFile=/srv/influx.conf
+ExecStart=/usr/bin/python3 -c 'from metrics.collectors.%I import run_metric; run_metric()'
+MemoryDenyWriteExecute=yes
+NoNewPrivileges=yes
+PrivateMounts=yes
+PrivateUsers=yes
+ProtectClock=yes
+ProtectControlGroups=yes
+ProtectHostname=yes
+ProtectKernelLogs=yes
+ProtectKernelModules=yes
+ProtectKernelTunables=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+RuntimeMaxSec=10m
+Type=simple
+WorkingDirectory=/srv/ubuntu-release-metrics/
