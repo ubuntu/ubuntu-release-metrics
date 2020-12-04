@@ -7,9 +7,9 @@
 
 set -e
 
-ABSPATH="$(realpath -e -s ${0})"
-PARENT="$(dirname $(dirname ${ABSPATH}))"
-SCRIPT="$(basename ${ABSPATH})"
+ABSPATH="$(realpath -e -s "${0}")"
+PARENT="$(dirname "$(dirname "${ABSPATH}")")"
+SCRIPT="$(basename "${ABSPATH}")"
 
 SCRIPT="${SCRIPT//-/_}"
 
