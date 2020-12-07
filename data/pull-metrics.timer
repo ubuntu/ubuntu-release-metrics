@@ -1,0 +1,9 @@
+[Unit]
+Description=Pull metrics repo (timer)
+After=timers.target
+
+[Timer]
+OnCalendar=hourly
+
+[Install]
+WantedBy=timers.target

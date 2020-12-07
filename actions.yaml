@@ -1,0 +1,5 @@
+# Copyright 2020 Canonical
+# See LICENSE file for licensing details.
+
+collect-now:
+  description: Makes a collection run now

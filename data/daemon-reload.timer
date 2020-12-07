@@ -1,0 +1,9 @@
+[Unit]
+Description=daemon-reload (timer)
+After=timers.target
+
+[Timer]
+OnCalendar=*:0,30
+
+[Install]
+WantedBy=timers.target

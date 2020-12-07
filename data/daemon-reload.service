@@ -1,0 +1,6 @@
+[Unit]
+Description=systemctl daemon-reload (to re-run generator)
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/systemctl daemon-reload

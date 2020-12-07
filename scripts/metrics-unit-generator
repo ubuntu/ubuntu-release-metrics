@@ -1,0 +1,57 @@
+#!/usr/bin/python3
+
+import importlib.machinery
+import os
+import subprocess
+import sys
+
+METRIC_TIMER_TEMPLATE = """\
+[Unit]
+Description=Run {unit} on a timer
+After=timers.target
+
+[Timer]
+OnBootSec=30s
+OnUnitInactiveSec={inactive}
+FixedRandomDelay=yes
+RandomizedDelaySec=10m
+Unit={unit}
+
+[Install]
+WantedBy=timers.target
+"""
+
+METRICS_DIR = "/srv/ubuntu-release-metrics"
+COLLECTORS_DIR = os.path.join(METRICS_DIR, "metrics", "collectors")
+
+sys.path.insert(0, METRICS_DIR)
+normal_unit_dir = sys.argv[1]
+
+timers_wants = os.path.join(normal_unit_dir, "timers.target.wants")
+
+os.makedirs(timers_wants, mode=0o755, exist_ok=True)
+
+
+def get_interval(module):
+    module = importlib.import_module(module)
+
+    return getattr(module, "RUN_INTERVAL", "5m")
+
+
+for path in os.listdir(COLLECTORS_DIR):
+    if not os.path.isdir(os.path.join(COLLECTORS_DIR, path)):
+        continue
+
+    interval = get_interval(f"metrics.collectors.{path}")
+    unit = f"run-metric-collector@{path}.service"
+    unit_timer = f"run-metric-collector@{path}.timer"
+    timer = METRIC_TIMER_TEMPLATE.format(
+        inactive=interval,
+        unit=unit,
+    )
+    unit_path = os.path.join(normal_unit_dir, unit_timer)
+
+    with open(unit_path, "w") as u:
+        u.write(timer)
+
+    os.symlink(f"../{unit_timer}", os.path.join(timers_wants, unit_timer))

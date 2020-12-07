@@ -1,0 +1,9 @@
+[Unit]
+Description=Start all metric collectors (timer)
+After=timers.target
+
+[Timer]
+OnCalendar=minutely
+
+[Install]
+WantedBy=timers.target

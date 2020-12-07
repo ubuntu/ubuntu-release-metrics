@@ -1,0 +1,7 @@
+[Unit]
+Description=Pull /srv/ubuntu-release-metrics/
+
+[Service]
+Type=oneshot
+WorkingDirectory=/srv/ubuntu-release-metrics/
+ExecStart=/usr/bin/git pull
