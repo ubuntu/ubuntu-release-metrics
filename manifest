@@ -1,0 +1,2 @@
+collect
+bundle config=bundle.yaml max-wait=1800

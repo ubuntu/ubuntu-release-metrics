@@ -1,0 +1,32 @@
+series: {{ series }}
+applications:
+  ubuntu-release-metrics-collector:
+    charm: ./{{ series }}/ubuntu-release-metrics-collector
+    num_units: 1
+    options:
+      influxdb-hostname: include-file://{{ local_dir }}/influx-hostname.txt
+      influxdb-username: metrics
+      influxdb-password: include-file://{{ local_dir }}/influx-password.txt
+      influxdb-database: metrics
+{%- if stage_name == "production" or stage_name == "staging" %}
+  telegraf:
+    charm: telegraf
+    expose: True
+  landscape-client:
+    charm: landscape-client
+    options:
+      account-name: standalone
+      ping-url: http://landscape.is.canonical.com/ping
+      tags: juju-managed
+      url: https://landscape.is.canonical.com/message-system
+      registration-key: include-file://{{local_dir}}/landscape-registration-key
+  livepatch:
+    charm: canonical-livepatch
+    options:
+      livepatch_key: include-file://{{local_dir}}/canonical-is-livepatch-key
+      snap_proxy: http://squid.internal:3128
+relations:
+  - ["ubuntu-release-metrics-collector:juju-info", "telegraf"]
+  - ["livepatch", "ubuntu-release-metrics-collector"]
+  - ["landscape-client", "ubuntu-release-metrics-collector"]
+{%- endif %}

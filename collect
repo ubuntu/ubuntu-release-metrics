@@ -1,0 +1,1 @@
+ubuntu-release-metrics-collector git://github.com/ubuntu/ubuntu-release-metrics/;branch=built,overwrite=True
