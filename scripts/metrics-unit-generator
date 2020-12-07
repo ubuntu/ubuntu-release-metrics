@@ -11,7 +11,7 @@ Description=Run {unit} on a timer
 After=timers.target
 
 [Timer]
-OnActiveSec=30s
+OnBootSec=30s
 OnUnitInactiveSec={inactive}
 Unit={unit}
 
