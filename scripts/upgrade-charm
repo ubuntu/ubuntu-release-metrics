@@ -1,0 +1,40 @@
+#!/bin/bash
+
+# Copyright (c) 2017 Canonical Ltd.
+# Author: Paul Gear
+
+set -e
+set -u
+
+export JUJU_REPOSITORY=${MOJO_REPO_DIR}
+
+if [ -z "${CHARM:-}" ]; then
+    echo "No charm specified for upgrade!  Giving up." >&2
+    exit 1
+fi
+
+if [ -z "${SERVICE:-}" ]; then
+    echo "No service specified for upgrade!  Assuming ${CHARM}." >&2
+    SERVICE=${CHARM}
+fi
+
+JUJU_VERSION=$(juju version | cut -d'.' -f 1)
+
+if [ $JUJU_VERSION == "1" ]; then
+    juju upgrade-charm ${SERVICE}
+else
+    JUJU_STATUS=$(juju status --format=json)
+    CHARM_ORIGIN=$(echo $JUJU_STATUS | jq --arg SERVICE "$SERVICE" '.applications | to_entries[] | select( .key == $SERVICE ) | .value | .["charm-origin"]')
+    # Work around https://bugs.launchpad.net/juju/+bug/1653562
+    if [ $CHARM_ORIGIN == "\"jujucharms\"" ]; then
+        live_revision=$(echo $JUJU_STATUS | jq --arg SERVICE "$SERVICE" '.applications | to_entries[] | select( .key == $SERVICE ) | .value | .["charm-rev"]')
+        store_revision=$(charm show cs:${CHARM} | awk '/^Revision/ {print $2}')
+        if [ "$live_revision" -lt "$store_revision" ] ; then
+            juju upgrade-charm ${SERVICE} || \
+            juju upgrade-charm ${SERVICE}
+        fi
+    else
+        juju upgrade-charm --path ${JUJU_REPOSITORY}/${MOJO_SERIES}/${CHARM} ${SERVICE} || \
+        juju upgrade-charm --path ${JUJU_REPOSITORY}/${MOJO_SERIES}/${CHARM} ${SERVICE}
+    fi
+fi

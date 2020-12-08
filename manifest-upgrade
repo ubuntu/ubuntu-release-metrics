@@ -1,0 +1,3 @@
+collect
+script config=scripts/utils/upgrade-charm CHARM=ubuntu-release-metrics-collector
+juju check-wait
