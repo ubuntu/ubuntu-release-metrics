@@ -44,9 +44,6 @@ that it's easier for people to run for testing purposes.
 
 But when starting a new metric, just copy the structure of an existing script!
 
-The `metrics` branch is auto pulled, so after merging your new collector will
-be run automatically.
-
 # Controlling how often metrics are collected
 
 The charm will handle arranging for each metric to be run periodically, but
@@ -55,15 +52,3 @@ your `__init__.py` called `RUN_INTERVAL` with a value [suitable for passing
 to `OnUnitInactiveSec` in a systemd timer
 unit](https://www.freedesktop.org/software/systemd/man/systemd.timer.html).
 The default value if you don't specify this is `5m`.
-
-# Deploying the charm
-
-*This is for the deployment itself, and not any collectors which run inside it*.
-
-You need to have access to the live environment, which means you need to be a
-Canonical employee.
-
-Build the charm using `charmcraft build` (`charmcraft` comes from a snap:
-`snap install charmcraft`). Copy the output of the `build` directory to the
-`build` branch, and push it. Then execute `mojo run` in the live environment
-to re-run the Mojo spec (which anyone can see in the `mojo` branch here).
