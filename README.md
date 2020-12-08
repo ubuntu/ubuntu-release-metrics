@@ -65,5 +65,6 @@ Canonical employee.
 
 Build the charm using `charmcraft build` (`charmcraft` comes from a snap:
 `snap install charmcraft`). Copy the output of the `build` directory to the
-`build` branch, and push it. Then execute `mojo run` in the live environment
-to re-run the Mojo spec (which anyone can see in the `mojo` branch here).
+`build` branch, and push it. Then execute `mojo run -m manifest-upgrade` in
+the live environment to re-run the Mojo spec (which anyone can see in the
+`mojo` branch here).
