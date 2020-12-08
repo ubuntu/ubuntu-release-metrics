@@ -14,7 +14,7 @@ After=timers.target
 OnBootSec=30s
 OnUnitInactiveSec={inactive}
 FixedRandomDelay=yes
-RandomizedDelaySec=10m
+RandomizedDelaySec=1m
 Unit={unit}
 
 [Install]
