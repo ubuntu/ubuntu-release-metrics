@@ -1,6 +1,5 @@
 # Copyright 2020 Canonical Ltd
 
-from functools import cache
 from launchpadlib.launchpad import Launchpad
 from metrics.lib.basemetric import Metric
 
@@ -12,7 +11,6 @@ class UbuntuQueueMetrics(Metric):
         self.active_series = {s.name: s for s in self.ubuntu.series if s.active}
         super().__init__()
 
-    @cache
     def _is_devel(self, series):
         return self.active_series[series] == self.ubuntu.current_series
 
