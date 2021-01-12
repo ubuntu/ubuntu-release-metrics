@@ -42,7 +42,10 @@ for path in os.listdir(COLLECTORS_DIR):
     if not os.path.isdir(os.path.join(COLLECTORS_DIR, path)):
         continue
 
-    interval = get_interval(f"metrics.collectors.{path}")
+    try:
+        interval = get_interval(f"metrics.collectors.{path}")
+    except ImportError:  # failed to import for some reason, still do the rest
+        continue
     unit = f"run-metric-collector@{path}.service"
     unit_timer = f"run-metric-collector@{path}.timer"
     timer = METRIC_TIMER_TEMPLATE.format(
