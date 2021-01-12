@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 CREDENTIALS_FILE = "/srv/influx.conf"
 METRICS_REPO = "https://github.com/ubuntu/ubuntu-release-metrics.git"
-PACKAGES_TO_INSTALL = ["git", "python3-influxdb"]
+PACKAGES_TO_INSTALL = ["git", "python3-influxdb", "python3-launchpadlib"]
 
 
 class UbuntuReleaseMetricsCollectorCharm(CharmBase):
