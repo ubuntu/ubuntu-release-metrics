@@ -1,12 +1,19 @@
 # Copyright 2020 Canonical Ltd
 
+import tempfile
+
 from launchpadlib.launchpad import Launchpad
 from metrics.lib.basemetric import Metric
 
 
 class UbuntuQueueMetrics(Metric):
     def __init__(self):
-        self.lp = Launchpad.login_anonymously("metrics", "production", "devel")
+        self.lp = Launchpad.login_anonymously(
+            "metrics",
+            "production",
+            launchpadlib_dir=tempfile.mkdtemp(),
+            version="devel",
+        )
         self.ubuntu = self.lp.distributions["ubuntu"]
         self.active_series = {s.name: s for s in self.ubuntu.series if s.active}
         super().__init__()
