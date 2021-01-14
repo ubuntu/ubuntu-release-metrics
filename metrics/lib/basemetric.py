@@ -3,13 +3,40 @@
 import argparse
 import logging
 import os
+import sys
 
 from influxdb import InfluxDBClient
 from metrics.lib.errors import CollectorError
 
 
+def run_metric_main(module, cls):
+    from importlib import import_module
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-n",
+        "--dry-run",
+        action="store_true",
+        help="Do not act but print what would be submitted",
+    )
+    parser.add_argument(
+        "-v", "--verbose", action="store_true", help="Be more verbose"
+    )
+
+    args = parser.parse_args()
+
+    cls = getattr(import_module(module), cls)
+    try:
+        cls(dry_run=args.dry_run, verbose=args.verbose).run()
+    except CollectorError:
+        sys.exit(1)
+
+
 class Metric:
-    def __init__(self):
+    def __init__(self, dry_run=False, verbose=False):
+        self.dry_run = dry_run
+        self.verbose = verbose
+
         self.log = logging.getLogger(__name__)
         ch = logging.StreamHandler()
         ch.setLevel(logging.DEBUG)
@@ -18,22 +45,6 @@ class Metric:
         self.log.addHandler(ch)
 
         self.log.setLevel(logging.INFO)
-
-        parser = argparse.ArgumentParser()
-        parser.add_argument(
-            "-n",
-            "--dry-run",
-            action="store_true",
-            help="Do not act but print what would be submitted",
-        )
-        parser.add_argument(
-            "-v", "--verbose", action="store_true", help="Be more verbose"
-        )
-
-        args = parser.parse_args()
-
-        self.dry_run = args.dry_run
-        self.verbose = args.verbose
 
         if self.verbose:
             self.log.setLevel(logging.DEBUG)

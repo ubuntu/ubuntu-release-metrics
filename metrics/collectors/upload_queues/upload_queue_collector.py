@@ -7,7 +7,9 @@ from metrics.lib.basemetric import Metric
 
 
 class UbuntuQueueMetrics(Metric):
-    def __init__(self):
+    def __init__(self, dry_run=False, verbose=False):
+        super().__init__(dry_run, verbose)
+
         self.lp = Launchpad.login_anonymously(
             "metrics",
             "production",
@@ -16,7 +18,6 @@ class UbuntuQueueMetrics(Metric):
         )
         self.ubuntu = self.lp.distributions["ubuntu"]
         self.active_series = {s.name: s for s in self.ubuntu.series if s.active}
-        super().__init__()
 
     def _is_devel(self, series):
         return self.active_series[series] == self.ubuntu.current_series
