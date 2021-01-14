@@ -2,9 +2,8 @@
 
 import json
 import urllib.request
-import sys
-
 from collections import defaultdict
+
 from distro_info import UbuntuDistroInfo as UDI
 from metrics.lib.basemetric import Metric
 from metrics.lib.ubunturelease import UbuntuRelease
