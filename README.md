@@ -1,4 +1,6 @@
-# Introduction
+# Ubuntu community metrics
+
+## Introduction
 
 The Ubuntu project has an [instance of
 Grafana](https://ubuntu-release.kpi.ubuntu.com/) which is a place for Ubuntu
@@ -7,20 +9,20 @@ teams to track their metrics.
 This repository hosts the scripts which collect data and push it to the
 Influxdb database that the Grafana reads from.
 
-# Architecture
+## Architecture
 
 There are three branches in this repository:
 
-  * ` metrics`. The default branch which contains the scripts themselves. These
-    will be run periodically.
-  * `charm`. This branch contains the Juju charm to deploy an instance which
+* `metrics`. The default branch which contains the scripts themselves. These
+  will be run periodically.
+* `charm`. This branch contains the Juju charm to deploy an instance which
   checks out `metrics` and arranges for them to be run regularly.
-  * `mojo`. This is [a delivery system for Juju
+* `mojo`. This is [a delivery system for Juju
   charms](https://mojo.canonical.com/). Most people won't need to touch this,
   but the Mojo spec is run on a "controller" host to arrange to collect
   secrets - the InfluxDB credentials - and deploy the charm.
 
-# Writing a collector
+## Writing a collector
 
 Collectors are python modules in the `metrics.collectors` namespace which
 expose a `run_metric()` function.
@@ -47,7 +49,7 @@ But when starting a new metric, just copy the structure of an existing script!
 The `metrics` branch is auto pulled, so after merging your new collector will
 be run automatically.
 
-# Controlling how often metrics are collected
+## Controlling how often metrics are collected
 
 The charm will handle arranging for each metric to be run periodically, but
 you can control how frequently this happens. Provide a top level variable in
@@ -56,7 +58,7 @@ to `OnUnitInactiveSec` in a systemd timer
 unit](https://www.freedesktop.org/software/systemd/man/systemd.timer.html).
 The default value if you don't specify this is `5m`.
 
-# Deploying the charm
+## Deploying the charm
 
 *This is for the deployment itself, and not any collectors which run inside it*.
 

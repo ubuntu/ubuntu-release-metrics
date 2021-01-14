@@ -1,7 +1,8 @@
 # Copyright 2019 Canonical Ltd
 
-from distro_info import UbuntuDistroInfo
 from functools import total_ordering
+
+from distro_info import UbuntuDistroInfo
 
 
 @total_ordering

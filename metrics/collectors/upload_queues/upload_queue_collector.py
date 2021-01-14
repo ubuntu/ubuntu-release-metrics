@@ -55,7 +55,6 @@ class UbuntuQueueMetrics(Metric):
                     status=status, pocket="Proposed"
                 )
                 oldest_age_in_days = 0
-                backlog_age = 0
                 backlog_count = 0
                 today = datetime.today()
                 for upload in uploads:
