@@ -19,9 +19,7 @@ def run_metric_main(module, cls):
         action="store_true",
         help="Do not act but print what would be submitted",
     )
-    parser.add_argument(
-        "-v", "--verbose", action="store_true", help="Be more verbose"
-    )
+    parser.add_argument("-v", "--verbose", action="store_true", help="Be more verbose")
 
     args = parser.parse_args()
 
