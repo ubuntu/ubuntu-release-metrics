@@ -1,12 +1,20 @@
 # Copyright 2021 Canonical Ltd
 
-from metrics.lib.basemetric import Metric
+import datetime
+import re
+import subprocess
+import tempfile
+
 from launchpadlib.launchpad import Launchpad
+from metrics.lib.basemetric import Metric
 
-import requests, datetime, tempfile
+RSYNC_SERVER_REQUESTS = [
+    "rsync://cdimage.ubuntu.com/cdimage/daily*/*/*.",
+    "rsync://cdimage.ubuntu.com/cdimage/*/daily*/*/*.",
+    "rsync://cdimage.ubuntu.com/cdimage/*/*/daily*/*/*.",
+]
+IMAGE_FORMATS = ["iso", "img.xz"]
 
-DESKTOP_CURRENT_DAILY = "http://cdimage.ubuntu.com/daily-live/current/%s-desktop-%s.iso"
-DESKTOP_LTS_DAILY = "http://cdimage.ubuntu.com/%s/daily-live/current/%s-desktop-%s.iso"
 
 class ImagesMetrics(Metric):
     def __init__(self, dry_run=False, verbose=False):
@@ -20,57 +28,85 @@ class ImagesMetrics(Metric):
         )
         self.ubuntu = self.lp.distributions["ubuntu"]
         self.active_series = {s.name: s for s in self.ubuntu.series if s.active}
-        self.current_serie = self.ubuntu.current_series
         self.date_now = datetime.datetime.now()
 
-    def get_iso_details(self, url):
-        response = requests.head(url)
-        last_modified = response.headers.get('Last-Modified')
-        # If the info is missing it's probably because the image is not available
-        if not last_modified:
-           return (False, 0, 0)
-        # HTTP headers are returning in RFC 1123 format
-        date_current_image = datetime.datetime.strptime(last_modified, '%a, %d %b %Y %H:%M:%S %Z')
-        image_age = (self.date_now - date_current_image).days
-
-        image_size = response.headers.get('content-length', 0)
-        return (True, image_age, image_size)
-
-    def collect_desktop_images(self):
-        """ Collect the desktop images details"""
-        data = []
-
-        # There are current daily built for those series
-        for serie in self.active_series:
-            # we build desktop on those architectures
-            for arch in ("amd64", "arm64"):
-                if serie == self.current_serie.name:
-                    url = DESKTOP_CURRENT_DAILY % (serie, arch)
-                else:
-                    url = DESKTOP_LTS_DAILY % (serie, serie, arch)
-                exists, image_age, image_size = self.get_iso_details(url)
-
-                if not exists:
-                    self.log.debug("There is no desktop %s/%s image" % (serie, arch))
-                    continue
-
-                data.append(
-                    {
-                        "measurement": "iso_images_details",
-                        "fields": {
-                            "age": image_age,
-                            "size": image_size,
-                        },
-                        "tags": {
-                            "release": serie,
-                            "arch": arch,
-                            "flavour": "desktop",
-                        },
-                    }
-                )
-        return data
+    def rsync_lists_images(self):
+        rsync = ""
+        for url in RSYNC_SERVER_REQUESTS:
+            for img in IMAGE_FORMATS:
+                try:
+                    rsync += subprocess.check_output(
+                        [
+                            "rsync",
+                            "-4",
+                            "--dry-run",
+                            "-RL",
+                            "--out-format='%l %M %f'",
+                            "--archive",
+                            "%s" % url + img,
+                            "/tmp",
+                        ],
+                        text=True,
+                    )
+                except subprocess.CalledProcessError as e:
+                    print("Rsync call failed: ", e.output)
+        return rsync
 
     def collect(self):
-        desktop = self.collect_desktop_images()
+        """ Collect the daily images details"""
+        data = []
 
-        return desktop
+        rsync_cmd_output = self.rsync_lists_images()
+
+        for rsyncline in rsync_cmd_output.splitlines():
+            if any(ext in rsyncline for ext in IMAGE_FORMATS):
+                if "current" in rsyncline or "pending" in rsyncline:
+                    # the format is specific in the rsync call '%l %M %f'
+                    size, mtime, path = rsyncline.strip("'").split()
+                    date_current_image = datetime.datetime.strptime(
+                        mtime, "%Y/%m/%d-%H:%M:%S"
+                    )
+                    image_age = (self.date_now - date_current_image).days
+
+                    # there are variations of the naming scheme so guess a bit
+                    path_table = path.split("/")
+                    # the path starts with a serie name then it's a desktop iso
+                    if path_table[0] in self.active_series:
+                        flavor = "ubuntu"
+                    # or with 'daily-live'
+                    elif path_table[0] == "daily-live":
+                        flavor = "ubuntu"
+                    # otherwise it starts with the flavor
+                    else:
+                        flavor = path_table[0]
+
+                    # the path ends with the image filename
+                    image_name = path_table[-1]
+
+                    # let's filter out old ubuntu-core-16 images
+                    if image_name.startswith("ubuntu-core-16"):
+                        continue
+
+                    if "current" in rsyncline:
+                        daily_or_current = "current"
+                    else:
+                        daily_or_current = "daily"
+
+                    regexp = re.compile(r"^(\w+)-.*-([\w\+]+)\..+")
+                    series, arch = regexp.search(image_name).groups()
+
+                    data.append(
+                        {
+                            "measurement": "daily_images_details",
+                            "fields": {
+                                "age": image_age,
+                                "size": size,
+                            },
+                            "tags": {
+                                "flavor": flavor,
+                                "release": series,
+                                "daily_or_current": daily_or_current,
+                            },
+                        }
+                    )
+        return data
