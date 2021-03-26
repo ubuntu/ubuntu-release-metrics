@@ -92,7 +92,7 @@ class ImagesMetrics(Metric):
                 if "current" in rsyncline:
                     current_or_pending = "current"
                 else:
-                    current_or_pending = "daily"
+                    current_or_pending = "pending"
 
                 regexp = re.compile(r"^(\w+)-.*-([\w\+]+)\..+")
                 series, arch = regexp.search(image_name).groups()
