@@ -35,7 +35,7 @@ class ImagesMetrics(Metric):
         for url in RSYNC_SERVER_REQUESTS:
             for img in IMAGE_FORMATS:
                 try:
-                    self.log.debug("Rsync listing %s" % url + img)
+                    self.log.debug("Rsync listing %s%s", url, img)
                     rsync += subprocess.check_output(
                         [
                             "rsync",
