@@ -65,6 +65,7 @@ class ImagesMetrics(Metric):
             if "current" in rsyncline or "pending" in rsyncline:
                 # the format is specific in the rsync call '%l %M %f'
                 size, mtime, path = rsyncline.strip("'").split()
+                size = int(size)
                 date_current_image = datetime.datetime.strptime(
                     mtime, "%Y/%m/%d-%H:%M:%S"
                 )
