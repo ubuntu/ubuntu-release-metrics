@@ -73,8 +73,12 @@ class ImagesMetrics(Metric):
 
                 # there are variations of the naming scheme so guess a bit
                 path_table = path.split("/")
+                # "ubuntu" is a convenience symlink. Everything else in there
+                # is found via other directories.
+                if path_table[0] == "ubuntu":
+                    continue
                 # the path starts with a serie name then it's a desktop iso
-                if path_table[0] in self.active_series:
+                elif path_table[0] in self.active_series:
                     flavor = "ubuntu"
                 # or with 'daily-live'
                 elif path_table[0] == "daily-live":
