@@ -110,6 +110,7 @@ class ImagesMetrics(Metric):
                             "flavor": flavor,
                             "release": series,
                             "current_or_pending": current_or_pending,
+                            "architecture": arch,
                         },
                     }
                 )
