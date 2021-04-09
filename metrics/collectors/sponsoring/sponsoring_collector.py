@@ -2,53 +2,50 @@
 
 import datetime
 import json
-import re
 import urllib.request
 
 from metrics.lib.basemetric import Metric
 
-SPONSORING_QUEUE_DIR = "http://reqorts.qa.ubuntu.com/reports/sponsoring/jsons/"
+SPONSORING_QUEUE_URL = "http://reqorts.qa.ubuntu.com/reports/sponsoring/sponsoring.json"
 
 
 class SponsoringMetrics(Metric):
     def collect(self):
         """ Collect the sponsoring queue details"""
         data = []
-        reports = []
+        set_age_items = {}
         datenow = datetime.datetime.now()
 
-        with urllib.request.urlopen(SPONSORING_QUEUE_DIR) as url:
-            for index in url.read().decode("utf-8", errors="ignore").split("\n"):
-                if ".json" in index:
-                    r = re.compile(r'<a href="([\w.-]+)">')
-                    reports.append(r.search(index).group(1))
-
-        for report in reports:
-            age_of_items = []
-            reporturl = "%s%s" % (SPONSORING_QUEUE_DIR, report)
-            with urllib.request.urlopen(reporturl) as url:
-                reportcontent = json.load(url)
-
-                for entry in reportcontent:
-                    date_queue = datetime.datetime.strptime(
-                        entry["date_queued"], "%m/%d/%y"
-                    )
-                    item_age = (datenow - date_queue).days
-                    age_of_items.append(item_age)
-
-                oldest = max(age_of_items)
-                average_age = int(sum(age_of_items) / len(age_of_items))
-
-                data.append(
-                    {
-                        "measurement": "sponsoring_queue_stats",
-                        "fields": {
-                            "count": len(reportcontent),
-                            "oldest": oldest,
-                            "average_age": average_age,
-                        },
-                        "tags": {"report": report.replace(".json", "")},
-                    }
+        with urllib.request.urlopen(SPONSORING_QUEUE_URL) as url:
+            report = json.load(url)
+            set_age_items["sponsoring"] = []
+            for entry in report:
+                date_queue = datetime.datetime.strptime(
+                    entry["date_queued"], "%m/%d/%y"
                 )
+                item_age = (datenow - date_queue).days
+
+                for set in entry["sets"]:
+                    if set not in set_age_items:
+                        set_age_items[set] = []
+                    set_age_items[set].append(item_age)
+                set_age_items["sponsoring"].append(item_age)
+
+        for report in set_age_items:
+            items = set_age_items[report]
+            oldest = max(items)
+            average_age = int(sum(items) / len(items))
+
+            data.append(
+                {
+                    "measurement": "sponsoring_queue_stats",
+                    "fields": {
+                        "count": len(items),
+                        "oldest": oldest,
+                        "average_age": average_age,
+                    },
+                    "tags": {"report": report},
+                }
+            )
 
         return data
