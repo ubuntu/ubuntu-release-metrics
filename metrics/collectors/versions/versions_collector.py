@@ -5,7 +5,7 @@ import urllib.request
 
 from metrics.lib.basemetric import Metric
 
-VERSIONS_STATS_URL = "https://people.canonical.com/~platform/desktop/stats/%s/" % datetime.datetime.now().strftime(
+VERSIONS_STATS_URL = "https://people.canonical.com/~platform/desktop/versions/stats/%s/" % datetime.datetime.now().strftime(
     "%Y-%m-%d"
 )
 
