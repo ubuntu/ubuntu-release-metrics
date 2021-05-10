@@ -17,15 +17,15 @@ class VersionsMetrics(Metric):
 
         known_reports_lst = []
         with urllib.request.urlopen(VERSIONS_STATS_URL + "reports") as reports:
-            for report in reports.read().decode("utf-8", errors="ignore").split("\n"):
+            for report in reports:
+                report = report.decode("utf-8", errors="ignore").strip()
                 if report:
                     known_reports_lst.append(report)
 
         for report in known_reports_lst:
             with urllib.request.urlopen(VERSIONS_STATS_URL + report) as stats:
-                for category in (
-                    stats.read().decode("utf-8", errors="ignore").split("\n")
-                ):
+                for category in stats:
+                    category = category.decode("utf-8", errors="ignore").strip()
                     if not category:
                         continue
                     category, value = category.split("=")
