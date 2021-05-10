@@ -38,7 +38,11 @@ class VersionsMetrics(Metric):
                         {
                             "measurement": "versions_script_stats",
                             "fields": {"count": value},
-                            "tags": {"report": report, "category": category},
+                            "tags": {
+                                "report": report,
+                                "category": category,
+                                "serie": "devel",
+                            },
                         }
                     )
 
