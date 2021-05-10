@@ -1,13 +1,13 @@
 # Copyright 2021 Canonical Ltd
 
-import datetime
 import urllib.parse
 import urllib.request
 
 from metrics.lib.basemetric import Metric
 
-VERSIONS_STATS_URL = "https://people.canonical.com/~platform/desktop/versions/stats/%s/"
-VERSIONS_STATS_TODAY = VERSIONS_STATS_URL % datetime.datetime.now().strftime("%Y-%m-%d")
+VERSIONS_STATS_URL = (
+    "https://people.canonical.com/~platform/desktop/versions/stats/current/"
+)
 
 
 class VersionsMetrics(Metric):
@@ -17,7 +17,7 @@ class VersionsMetrics(Metric):
 
         known_reports_lst = []
         with urllib.request.urlopen(
-            urllib.parse.urljoin(VERSIONS_STATS_TODAY, "reports")
+            urllib.parse.urljoin(VERSIONS_STATS_URL, "reports")
         ) as reports:
             for report in reports:
                 report = report.decode("utf-8", errors="ignore").strip()
@@ -26,7 +26,7 @@ class VersionsMetrics(Metric):
 
         for report in known_reports_lst:
             with urllib.request.urlopen(
-                urllib.parse.urljoin(VERSIONS_STATS_TODAY, report)
+                urllib.parse.urljoin(VERSIONS_STATS_URL, report)
             ) as stats:
                 for category in stats:
                     category = category.decode("utf-8", errors="ignore").strip()
