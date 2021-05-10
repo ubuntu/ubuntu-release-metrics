@@ -40,7 +40,7 @@ class VersionsMetrics(Metric):
                             "tags": {
                                 "report": report,
                                 "category": category,
-                                "serie": "devel",
+                                "series": "devel",
                             },
                         }
                     )
