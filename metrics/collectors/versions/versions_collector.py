@@ -33,6 +33,7 @@ class VersionsMetrics(Metric):
                     if not category:
                         continue
                     category, value = category.split("=")
+                    value = int(value)
                     data.append(
                         {
                             "measurement": "versions_script_stats",
