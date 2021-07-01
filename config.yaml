@@ -19,3 +19,7 @@ options:
   influxdb-database:
     default: ""
     description: The influxdb database to use
+  dry-run:
+    default: false
+    type: boolean
+    descriptiion: Whether to run in dry-run mode and not submit to the influxdb
