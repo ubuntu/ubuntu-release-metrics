@@ -15,6 +15,7 @@ from ops.framework import StoredState
 logger = logging.getLogger(__name__)
 
 CREDENTIALS_FILE = "/srv/influx.conf"
+DRY_RUN_FILE = "/srv/dry-run.conf"
 METRICS_REPO = "https://github.com/ubuntu/ubuntu-release-metrics.git"
 PACKAGES_TO_INSTALL = ["git", "python3-influxdb", "python3-launchpadlib"]
 
@@ -138,6 +139,18 @@ class UbuntuReleaseMetricsCollectorCharm(CharmBase):
             """
                 )
             )
+
+        dry_run = self.model.config["dry-run"]
+
+        with open(
+            os.open(
+                DRY_RUN_FILE,
+                os.O_CREAT | os.O_TRUNC | os.O_WRONLY,
+                mode=0o600,
+            ),
+            "w",
+        ) as drf:
+            drf.write(f"DRY_RUN={str(dry_run)}\n")
 
 
 if __name__ == "__main__":

@@ -5,8 +5,11 @@ Wants=pull-metrics.service
 
 [Service]
 DynamicUser=yes
+# The default value of ${DRY_RUN}
+Environment=DRY_RUN=False
 EnvironmentFile=/srv/influx.conf
-ExecStart=/usr/bin/python3 -c 'from metrics.collectors.%I import run_metric; run_metric()'
+EnvironmentFile=-/srv/dry-run.conf
+ExecStart=/usr/bin/python3 -c 'from metrics.collectors.%I import run_metric; run_metric(dry_run=${DRY_RUN}, verbose=${DRY_RUN})'
 MemoryDenyWriteExecute=yes
 NoNewPrivileges=yes
 PrivateMounts=yes
