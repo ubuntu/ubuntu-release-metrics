@@ -3,5 +3,6 @@ Description=Pull /srv/ubuntu-release-metrics/
 
 [Service]
 Type=oneshot
+EnvironmentFile=-/etc/environment.d/proxy.conf
 WorkingDirectory=/srv/ubuntu-release-metrics/
 ExecStart=/usr/bin/git pull

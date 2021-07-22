@@ -23,3 +23,12 @@ options:
     default: false
     type: boolean
     descriptiion: Whether to run in dry-run mode and not submit to the influxdb
+  http-proxy:
+    default: ""
+    description: What to write to http_proxy in /etc/environment
+  https-proxy:
+    default: ""
+    description: What to write to https_proxy in /etc/environment
+  no-proxy:
+    default: ""
+    description: What to write to no_proxy in /etc/environment

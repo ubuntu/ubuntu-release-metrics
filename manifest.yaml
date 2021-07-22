@@ -3,5 +3,5 @@ bases:
   - amd64
   channel: '20.04'
   name: ubuntu
-charmcraft-started-at: '2021-07-08T16:22:09.882353Z'
+charmcraft-started-at: '2021-07-22T14:00:36.974388Z'
 charmcraft-version: 0.10.0

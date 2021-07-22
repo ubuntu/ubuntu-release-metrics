@@ -5,17 +5,17 @@
 import logging
 import os
 import subprocess
-
 from textwrap import dedent
 
 from ops.charm import CharmBase
-from ops.main import main
 from ops.framework import StoredState
+from ops.main import main
 
 logger = logging.getLogger(__name__)
 
 CREDENTIALS_FILE = "/srv/influx.conf"
 DRY_RUN_FILE = "/srv/dry-run.conf"
+ENVIRONMENT_FILE = "/etc/environment.d/proxy.conf"
 METRICS_REPO = "https://github.com/ubuntu/ubuntu-release-metrics.git"
 PACKAGES_TO_INSTALL = ["git", "python3-influxdb", "python3-launchpadlib"]
 
@@ -25,6 +25,16 @@ class UbuntuReleaseMetricsCollectorCharm(CharmBase):
 
     def __init__(self, *args):
         super().__init__(*args)
+
+        self.http_proxy = self.model.config.get("http-proxy")
+        self.https_proxy = self.model.config.get("https-proxy")
+        self.no_proxy = self.model.config.get("no-proxy")
+
+        self.subprocess_env = os.environ.copy()
+        self.subprocess_env["http_proxy"] = self.http_proxy
+        self.subprocess_env["https_proxy"] = self.https_proxy
+        self.subprocess_env["no_proxy"] = self.no_proxy
+
         self.framework.observe(self.on.config_changed, self._on_config_changed)
         self.framework.observe(self.on.install, self._on_install)
         self.framework.observe(self.on.start, self._on_start)
@@ -45,6 +55,7 @@ class UbuntuReleaseMetricsCollectorCharm(CharmBase):
                 "install",
             ]
             + list(packages),
+            env=self.subprocess_env,
         )
         self._stored.installed_packages |= packages
 
@@ -59,7 +70,8 @@ class UbuntuReleaseMetricsCollectorCharm(CharmBase):
                 "clone",
                 METRICS_REPO,
                 os.path.expanduser("/srv/ubuntu-release-metrics/"),
-            ]
+            ],
+            env=self.subprocess_env,
         )
         self._stored.repo_cloned = True
 
@@ -93,6 +105,22 @@ class UbuntuReleaseMetricsCollectorCharm(CharmBase):
                 ),
                 "/etc/systemd/system-generators/metrics-unit-generator",
             )
+
+        if self.http_proxy or self.https_proxy or self.no_proxy:
+            logger.info(f"Writing proxy settings to {ENVIRONMENT_FILE}")
+            os.makedirs(os.path.dirname(ENVIRONMENT_FILE), exist_ok=True)
+            with open(ENVIRONMENT_FILE, "w") as env:
+                if self.http_proxy:
+                    env.write(f"http_proxy={self.http_proxy}\n")
+                if self.https_proxy:
+                    env.write(f"https_proxy={self.https_proxy}\n")
+                if self.no_proxy:
+                    env.write(f"no_proxy={self.no_proxy}\n")
+        else:
+            try:
+                os.unlink(ENVIRONMENT_FILE)
+            except FileNotFoundError:
+                pass
 
     def _on_install(self, _):
         self._ensure_set_up()
