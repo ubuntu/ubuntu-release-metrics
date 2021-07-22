@@ -8,6 +8,9 @@ applications:
       influxdb-username: metrics
       influxdb-password: include-file://{{ local_dir }}/influx-password.txt
       influxdb-database: metrics
+      http-proxy: http://squid.internal:3128
+      https-proxy: http://squid.internal:3128
+      no-proxy: 127.0.0.1,::1,localhost,10.0.0.0/8,canonical.com,ubuntu.com,launchpad.net,internal
 {%- if stage_name == "production" or stage_name == "staging" %}
   telegraf:
     charm: telegraf
