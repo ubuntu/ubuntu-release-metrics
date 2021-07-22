@@ -23,13 +23,12 @@ applications:
       tags: juju-managed
       url: https://landscape.is.canonical.com/message-system
       registration-key: include-file://{{local_dir}}/landscape-registration-key
-  livepatch:
-    charm: canonical-livepatch
+  ua:
+    charm: cs:~ubuntu-advantage-charmers/ubuntu-advantage
     options:
-      livepatch_key: include-file://{{local_dir}}/canonical-is-livepatch-key
-      snap_proxy: http://squid.internal:3128
+      token: include-file://{{local_dir}}/canonical-is-ua.key
 relations:
   - ["ubuntu-release-metrics-collector:juju-info", "telegraf"]
-  - ["livepatch", "ubuntu-release-metrics-collector"]
+  - ["ua", "ubuntu-release-metrics-collector"]
   - ["landscape-client", "ubuntu-release-metrics-collector"]
 {%- endif %}
