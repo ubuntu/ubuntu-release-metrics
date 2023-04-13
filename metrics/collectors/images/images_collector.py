@@ -9,11 +9,11 @@ from launchpadlib.launchpad import Launchpad
 from metrics.lib.basemetric import Metric
 
 RSYNC_SERVER_REQUESTS = [
-    "rsync://cdimage.ubuntu.com/cdimage/daily*/*/*.",
-    "rsync://cdimage.ubuntu.com/cdimage/*/daily*/*/*.",
-    "rsync://cdimage.ubuntu.com/cdimage/*/*/daily*/*/*.",
+    "rsync://cdimage.ubuntu.com/cdimage/daily*/*/*",
+    "rsync://cdimage.ubuntu.com/cdimage/*/daily*/*/*",
+    "rsync://cdimage.ubuntu.com/cdimage/*/*/daily*/*/*",
 ]
-IMAGE_FORMATS = ["iso", "img.xz"]
+IMAGE_FORMATS = [".iso", ".img.xz"]
 
 
 class ImagesMetrics(Metric):
