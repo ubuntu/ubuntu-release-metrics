@@ -11,7 +11,9 @@ from metrics.lib.basemetric import Metric
 RSYNC_SERVER_REQUESTS = [
     "rsync://cdimage.ubuntu.com/cdimage/daily*/*/*",
     "rsync://cdimage.ubuntu.com/cdimage/*/daily*/*/*",
+    "rsync://cdimage.ubuntu.com/cdimage/*/dvd/*/*",
     "rsync://cdimage.ubuntu.com/cdimage/*/*/daily*/*/*",
+    "rsync://cdimage.ubuntu.com/cdimage/*/*/dvd/*/*",
 ]
 IMAGE_FORMATS = [".iso", ".img.xz"]
 
