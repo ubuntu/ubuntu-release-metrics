@@ -36,10 +36,10 @@ class CommandNotFoundMetric(Metric):
         """
         metrics collecting function
         """
-        data = {}
+        data = []
         for s in self.active_series:
-            data[s] = {}
             url = URL.replace("release", s)
+            count = None
             try:
                 with urllib.request.urlopen(url) as fp:
                     bytes_resp = fp.read()
@@ -58,10 +58,17 @@ class CommandNotFoundMetric(Metric):
                             date_str, "%Y-%m-%d %H:%M"
                         )
                         age = self.date_now - datetime_object
-                        age = age.total_seconds()
-                        data[s]["age (days)"] = age / 86400
+                        count = age.total_seconds() / 86400
             except urllib.error.HTTPError:
-                data[s]["age (days)"] = None
+                count = None
+                continue
+            data.append(
+                {
+                    "measurement": "command_not_found_age",
+                    "fields": {"cnf_age": count, "out_of_date": (count > 1),},
+                    "tags": {"release": s},
+                }
+            )
         return data
 
     def collect(self):
