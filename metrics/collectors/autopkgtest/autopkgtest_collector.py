@@ -19,13 +19,18 @@ RUNNING_URL = {
 
 class AutopkgtestMetrics(Metric):
     def fetch(self, url):
-        with urllib.request.urlopen(url) as resp:
-            return json.load(resp)
+        try:
+            with urllib.request.urlopen(url) as resp:
+                return json.load(resp)
+        except urllib.error.URLError:
+            return []
 
     def collect_queue_sizes(self):
         data = []
         for instance in ("production", "staging"):
             queue_sizes = self.fetch(QUEUE_SIZE_URL[instance])
+            if not queue_sizes:
+                continue
             for context in queue_sizes:
                 for release in queue_sizes[context]:
                     for arch, count in queue_sizes[context][release].items():
