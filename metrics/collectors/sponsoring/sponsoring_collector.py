@@ -6,7 +6,7 @@ import urllib.request
 
 from metrics.lib.basemetric import Metric
 
-SPONSORING_QUEUE_URL = "http://reqorts.qa.ubuntu.com/reports/sponsoring/sponsoring.json"
+SPONSORING_QUEUE_URL = "http://sponsoring-reports.ubuntu.com/jsons/general.json"
 
 
 class SponsoringMetrics(Metric):
