@@ -9,10 +9,10 @@ from metrics.lib.basemetric import Metric
 from metrics.lib.ubunturelease import UbuntuRelease
 
 INCOMING_URL_PATTERN = (
-    "https://reqorts.qa.ubuntu.com/reports/rls-mgr/rls-{}-incoming.json"
+    "http://reports.qa.ubuntu.com/reports/rls-mgr/rls-{}-incoming.json"
 )
 TRACKING_URL_PATTERN = (
-    "https://reqorts.qa.ubuntu.com/reports/rls-mgr/rls-{}-tracking.json"
+    "http://reports.qa.ubuntu.com/reports/rls-mgr/rls-{}-tracking.json"
 )
 
 
