@@ -92,6 +92,12 @@ class ImagesMetrics(Metric):
                 # the path ends with the image filename
                 image_name = path_table[-1]
 
+                image_type = None
+                for part_of_path in path_table:
+                    # If statement like this to cover daily-live, daily-legacy
+                    # daily-minimal and daily-preinstalled
+                    if "daily-" in part_of_path:
+                        image_type = part_of_path.replace("daily-", "")
                 # let's filter out old ubuntu-core-16 images
                 if image_name.startswith("ubuntu-core-16"):
                     continue
@@ -113,6 +119,7 @@ class ImagesMetrics(Metric):
                             "release": series,
                             "current_or_pending": current_or_pending,
                             "architecture": arch,
+                            "image_type": image_type,
                         },
                     }
                 )
