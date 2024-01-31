@@ -83,7 +83,10 @@ class ImagesMetrics(Metric):
                 elif path_table[0] in self.active_series:
                     flavor = "ubuntu"
                 # or with 'daily-live'
-                elif path_table[0] == "daily-live":
+                elif (
+                    path_table[0] == "daily-live"
+                    or path_table[0] == "daily-preinstalled"
+                ):
                     flavor = "ubuntu"
                 # otherwise it starts with the flavor
                 else:
@@ -95,9 +98,11 @@ class ImagesMetrics(Metric):
                 image_type = None
                 for part_of_path in path_table:
                     # If statement like this to cover daily-live, daily-legacy
-                    # daily-minimal and daily-preinstalled
-                    if "daily-" in part_of_path:
+                    # daily-minimal, daily-preinstalled and dvd
+                    starts_with_daily = part_of_path.startswith("daily-")
+                    if starts_with_daily or part_of_path == "dvd":
                         image_type = part_of_path.replace("daily-", "")
+                        break
                 # let's filter out old ubuntu-core-16 images
                 if image_name.startswith("ubuntu-core-16"):
                     continue
