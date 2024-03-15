@@ -21,7 +21,7 @@ Unit={unit}
 WantedBy=timers.target
 """
 
-METRICS_DIR = "/srv/ubuntu-release-metrics"
+METRICS_DIR = "/home/ubuntu/.local/share/ubuntu-release-metrics"
 COLLECTORS_DIR = os.path.join(METRICS_DIR, "metrics", "collectors")
 
 sys.path.insert(0, METRICS_DIR)
