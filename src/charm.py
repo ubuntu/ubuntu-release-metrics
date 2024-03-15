@@ -17,6 +17,8 @@ CREDENTIALS_FILE = "/srv/influx.conf"
 DRY_RUN_FILE = "/srv/dry-run.conf"
 ENVIRONMENT_FILE = "/etc/environment.d/proxy.conf"
 METRICS_REPO = "https://github.com/ubuntu/ubuntu-release-metrics.git"
+CLONE_LOCATION = "/home/ubuntu/.local/share/"
+CLONE_SYMLINK_LOCATION = "/srv/"
 PACKAGES_TO_INSTALL = ["git", "python3-influxdb", "python3-launchpadlib"]
 
 
@@ -69,9 +71,17 @@ class UbuntuReleaseMetricsCollectorCharm(CharmBase):
                 "git",
                 "clone",
                 METRICS_REPO,
-                os.path.expanduser("/srv/ubuntu-release-metrics/"),
+                CLONE_LOCATION,
             ],
             env=self.subprocess_env,
+        )
+        subprocess.check_call(
+            [
+                "ln",
+                "-s",
+                f"{CLONE_LOCATION}ubuntu-release-metrics",
+                CLONE_SYMLINK_LOCATION,
+            ]
         )
         self._stored.repo_cloned = True
 
