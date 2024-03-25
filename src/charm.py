@@ -10,6 +10,7 @@ from textwrap import dedent
 from ops.charm import CharmBase
 from ops.framework import StoredState
 from ops.main import main
+from ops import ActiveStatus
 
 logger = logging.getLogger(__name__)
 
@@ -127,6 +128,7 @@ class UbuntuReleaseMetricsCollectorCharm(CharmBase):
                 os.unlink(ENVIRONMENT_FILE)
             except FileNotFoundError:
                 pass
+        self.unit.status = ActiveStatus()
 
     def _on_install(self, _):
         self._ensure_set_up()
