@@ -13,12 +13,15 @@ options:
   influxdb-username:
     default: ""
     description: The influxdb username
+    type: string
   influxdb-password:
     default: ""
     description: The influxdb password
+    type: string
   influxdb-database:
     default: ""
     description: The influxdb database to use
+    type: string
   dry-run:
     default: false
     type: boolean
@@ -26,9 +29,12 @@ options:
   http-proxy:
     default: ""
     description: What to write to http_proxy in /etc/environment
+    type: string
   https-proxy:
     default: ""
     description: What to write to https_proxy in /etc/environment
+    type: string
   no-proxy:
     default: ""
     description: What to write to no_proxy in /etc/environment
+    type: string
