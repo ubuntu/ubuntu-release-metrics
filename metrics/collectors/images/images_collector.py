@@ -17,6 +17,8 @@ RSYNC_SERVER_REQUESTS = [
 ]
 IMAGE_FORMATS = [".iso", ".img.xz"]
 
+UBUNTUSTUDIO_DVD_RELEASES = ["jammy", "noble"]
+
 
 class ImagesMetrics(Metric):
     def __init__(self, dry_run=False, verbose=False):
@@ -56,7 +58,7 @@ class ImagesMetrics(Metric):
         return rsync
 
     def collect(self):
-        """ Collect the daily images details"""
+        """Collect the daily images details"""
         data = []
 
         rsync_cmd_output = self.rsync_list_images()
@@ -114,6 +116,19 @@ class ImagesMetrics(Metric):
 
                 regexp = re.compile(r"^(\w+)-.*-([\w\+]+)\..+")
                 series, arch = regexp.search(image_name).groups()
+
+                # 2024-06-17 ubuntu studio recently moved from having a "dvd" directory
+                # to having a "daily-live" directory for oracular - until jammy and noble are
+                # EOL we'll need this hack unless the directories for jammy and noble get
+                # retroactively changed.
+                # This hack stops us pushing data to the KPI for images under this directory:
+                # https://cdimage.ubuntu.com/ubuntustudio/dvd/
+                if (
+                    flavor == "ubuntustudio"
+                    and series not in UBUNTUSTUDIO_DVD_RELEASES
+                    and "dvd" in rsyncline
+                ):
+                    continue
 
                 data.append(
                     {
