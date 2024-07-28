@@ -4,12 +4,12 @@ After=pull-metrics.service
 Wants=pull-metrics.service
 
 [Service]
-DynamicUser=yes
+User=ubuntu
 # The default value of ${DRY_RUN}
 Environment=DRY_RUN=False
-EnvironmentFile=/srv/influx.conf
-EnvironmentFile=-/srv/dry-run.conf
-EnvironmentFile=-/etc/environment.d/proxy.conf
+EnvironmentFile=/home/ubuntu/.local/share/influx.conf
+EnvironmentFile=-/home/ubuntu/.local/share/dry-run.conf
+EnvironmentFile=-/home/ubuntu/.local/share/proxy.conf
 ExecStart=/usr/bin/python3 -c 'from metrics.collectors.%I import run_metric; run_metric(dry_run=${DRY_RUN}, verbose=${DRY_RUN})'
 MemoryDenyWriteExecute=yes
 NoNewPrivileges=yes
@@ -26,4 +26,4 @@ RestrictRealtime=yes
 RestrictSUIDSGID=yes
 RuntimeMaxSec=10m
 Type=simple
-WorkingDirectory=/srv/ubuntu-release-metrics/
+WorkingDirectory=/home/ubuntu/.local/share/ubuntu-release-metrics/

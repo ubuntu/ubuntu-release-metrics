@@ -10,13 +10,15 @@ from textwrap import dedent
 from ops.charm import CharmBase
 from ops.framework import StoredState
 from ops.main import main
+from ops import ActiveStatus
 
 logger = logging.getLogger(__name__)
 
-CREDENTIALS_FILE = "/srv/influx.conf"
-DRY_RUN_FILE = "/srv/dry-run.conf"
-ENVIRONMENT_FILE = "/etc/environment.d/proxy.conf"
+CREDENTIALS_FILE = "/home/ubuntu/.local/share/influx.conf"
+DRY_RUN_FILE = "/home/ubuntu/.local/share/dry-run.conf"
+ENVIRONMENT_FILE = "/home/ubuntu/.local/share/proxy.conf"
 METRICS_REPO = "https://github.com/ubuntu/ubuntu-release-metrics.git"
+CLONE_LOCATION = "/home/ubuntu/.local/share/ubuntu-release-metrics"
 PACKAGES_TO_INSTALL = ["git", "python3-influxdb", "python3-launchpadlib"]
 
 
@@ -66,10 +68,14 @@ class UbuntuReleaseMetricsCollectorCharm(CharmBase):
         logger.info(f"Cloning {METRICS_REPO}")
         subprocess.check_call(
             [
+                "sudo",
+                "-H",
+                "-u",
+                "ubuntu",
                 "git",
                 "clone",
                 METRICS_REPO,
-                os.path.expanduser("/srv/ubuntu-release-metrics/"),
+                CLONE_LOCATION,
             ],
             env=self.subprocess_env,
         )
@@ -79,6 +85,7 @@ class UbuntuReleaseMetricsCollectorCharm(CharmBase):
         self._install_packages(set(PACKAGES_TO_INSTALL))
         self._clone_metrics_repo()
         unit_dir = "/etc/systemd/system"
+
         for unit in (
             "daemon-reload.service",
             "daemon-reload.timer",
@@ -121,6 +128,7 @@ class UbuntuReleaseMetricsCollectorCharm(CharmBase):
                 os.unlink(ENVIRONMENT_FILE)
             except FileNotFoundError:
                 pass
+        self.unit.status = ActiveStatus()
 
     def _on_install(self, _):
         self._ensure_set_up()

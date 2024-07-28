@@ -1,0 +1,49 @@
+# This file configures Charmcraft.
+# See https://juju.is/docs/sdk/charmcraft-config for guidance.
+
+# (Required)
+# The charm package name, no spaces
+# See https://juju.is/docs/sdk/naming#heading--naming-charms for guidance.
+name: ubuntu-release-metrics
+
+
+# (Required)
+# The charm type, either 'charm' or 'bundle'.
+type: charm
+
+
+# (Recommended)
+title: Ubuntu Release Metrics
+
+
+# (Required)
+summary: A charm which collects a plethora of metrics related to the release of ubuntu series.
+
+
+# (Required)
+description: |
+  This charm contains numerous scripts which collect metrics related to ubuntu releases.
+
+  The charm itself however just clones the git repository which contains these scripts.
+
+  It also sets up the systemd units for the scripts after cloning the repo.
+
+
+# (Required for 'charm' type)
+# A list of environments (OS version and architecture) where charms must be
+# built on and run on.
+bases:
+  - build-on:
+    - name: ubuntu
+      channel: "22.04"
+    run-on:
+    - name: ubuntu
+      channel: "22.04"
+
+
+parts:
+  charm:
+    prime:
+      - data/*
+      - scripts/*
+
