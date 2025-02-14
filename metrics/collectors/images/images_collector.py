@@ -15,7 +15,7 @@ RSYNC_SERVER_REQUESTS = [
     "rsync://cdimage.ubuntu.com/cdimage/*/*/daily*/*/*",
     "rsync://cdimage.ubuntu.com/cdimage/*/*/dvd/*/*",
 ]
-IMAGE_FORMATS = [".iso", ".img.xz"]
+IMAGE_FORMATS = [".iso", ".img.xz", ".wsl"]
 
 UBUNTUSTUDIO_DVD_RELEASES = ["jammy", "noble"]
 
