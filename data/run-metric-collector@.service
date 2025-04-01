@@ -11,7 +11,6 @@ EnvironmentFile=/home/ubuntu/.local/share/influx.conf
 EnvironmentFile=-/home/ubuntu/.local/share/dry-run.conf
 EnvironmentFile=-/home/ubuntu/.local/share/proxy.conf
 ExecStart=/usr/bin/python3 -c 'from metrics.collectors.%I import run_metric; run_metric(dry_run=${DRY_RUN}, verbose=${DRY_RUN})'
-MemoryDenyWriteExecute=yes
 NoNewPrivileges=yes
 PrivateMounts=yes
 PrivateUsers=yes
