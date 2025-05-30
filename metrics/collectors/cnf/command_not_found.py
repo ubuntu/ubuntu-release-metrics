@@ -7,6 +7,7 @@ Collects metrics for command not found indexes
 import datetime
 import tempfile
 import urllib
+import shutil
 
 from launchpadlib.launchpad import Launchpad
 from metrics.lib.basemetric import Metric
@@ -22,10 +23,13 @@ class CommandNotFoundMetric(Metric):
     def __init__(self, dry_run=False, verbose=False):
         super().__init__(dry_run, verbose)
 
+        self.launchpadlib_dir = tempfile.mkdtemp()
+        self.temp_resources.append(self.launchpadlib_dir)
+
         self.lp = Launchpad.login_anonymously(
             "metrics",
             "production",
-            launchpadlib_dir=tempfile.mkdtemp(),
+            launchpadlib_dir=self.launchpadlib_dir,
             version="devel",
         )
         self.ubuntu = self.lp.distributions["ubuntu"]
@@ -74,3 +78,4 @@ class CommandNotFoundMetric(Metric):
     def collect(self):
         """Collect the cnf details"""
         return self.get_cnf_ages_in_days()
+    
