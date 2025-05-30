@@ -4,6 +4,7 @@ import argparse
 import logging
 import os
 import sys
+import shutil
 
 from influxdb import InfluxDBClient
 from metrics.lib.errors import CollectorError
@@ -65,6 +66,8 @@ class Metric:
             )
         else:
             self.log.info("Running in dry-run mode.")
+        
+        self.temp_resources = []
 
     def collect(self):
         raise NotImplementedError
@@ -78,3 +81,13 @@ class Metric:
             self.log.info(f"[dry-run] Would submit: {pprint.pformat(data)}")
         else:
             self.influx_client.write_points(data)
+
+        self.close()
+
+    def close(self):
+        for resource in self.temp_resources:
+            try:
+                shutil.rmtree(resource)
+                self.log.debug(f"Temporary resource {resource} cleaned up.")
+            except Exception as e:
+                self.log.error(f"Error while cleaning up {resource}: {e}")

@@ -10,10 +10,13 @@ class UbuntuQueueMetrics(Metric):
     def __init__(self, dry_run=False, verbose=False):
         super().__init__(dry_run, verbose)
 
+        self.launchpadlib_dir = tempfile.mkdtemp()
+        self.temp_resources.append(self.launchpadlib_dir)
+
         self.lp = Launchpad.login_anonymously(
             "metrics",
             "production",
-            launchpadlib_dir=tempfile.mkdtemp(),
+            launchpadlib_dir=self.launchpadlib_dir,
             version="devel",
         )
         self.ubuntu = self.lp.distributions["ubuntu"]
