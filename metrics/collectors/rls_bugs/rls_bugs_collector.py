@@ -5,6 +5,7 @@ import urllib.request
 from collections import defaultdict
 
 from distro_info import UbuntuDistroInfo as UDI
+
 from metrics.lib.basemetric import Metric
 from metrics.lib.ubunturelease import UbuntuRelease
 
@@ -37,7 +38,7 @@ class ReleaseBugsMetrics(Metric):
         data = []
 
         def fetch(urls, result_dict):
-            for (codename, url) in urls:
+            for codename, url in urls:
                 self.log.debug(f"Fetching {url}")
                 with urllib.request.urlopen(url) as resp:
                     resp_json = json.load(resp)

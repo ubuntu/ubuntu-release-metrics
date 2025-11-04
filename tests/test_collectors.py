@@ -14,7 +14,7 @@ class TestCollector(unittest.TestCase):
         """Test each test runner in dry run mode. They will all most likely
         access the internet, so we may want to consider replacing this with
         mocks in future."""
-        for (module_loader, name, ispkg) in pkgutil.iter_modules(
+        for module_loader, name, ispkg in pkgutil.iter_modules(
             [os.path.join("metrics", "collectors")], prefix="metrics.collectors."
         ):
             importlib.import_module(name, __package__)

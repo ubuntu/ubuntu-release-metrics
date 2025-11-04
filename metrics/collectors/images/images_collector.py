@@ -6,6 +6,7 @@ import subprocess
 import tempfile
 
 from launchpadlib.launchpad import Launchpad
+
 from metrics.lib.basemetric import Metric
 
 RSYNC_SERVER_REQUESTS = [

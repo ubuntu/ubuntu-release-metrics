@@ -5,6 +5,7 @@ from urllib.parse import urljoin
 
 import requests
 from distro_info import UbuntuDistroInfo
+
 from metrics.lib.basemetric import Metric
 
 BRITNEY_URL = "https://ubuntu-archive-team.ubuntu.com/proposed-migration/"

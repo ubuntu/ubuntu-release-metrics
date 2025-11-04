@@ -1,9 +1,8 @@
 import logging
-import shutil
 import os
-import re
+import shutil
 from pathlib import Path
-from subprocess import CalledProcessError, check_call, check_output
+from subprocess import CalledProcessError, check_call
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +24,7 @@ Environment=http_proxy=$HTTP_PROXY
 Environment=https_proxy=$HTTPS_PROXY
 Environment=no_proxy=$NO_PROXY
 EnvironmentFile={str(self._influx_path)}
-ExecStart=/usr/bin/python3 -c 'from metrics.collectors.$METRIC import run_metric; run_metric(dry_run=${DRY_RUN}, verbose=True)'
+ExecStart=/usr/bin/python3 -c 'from metrics.collectors.$METRIC import run_metric; run_metric(dry_run=$DRY_RUN, verbose=True)'
 NoNewPrivileges=yes
 PrivateMounts=yes
 PrivateUsers=yes
@@ -40,7 +39,7 @@ RestrictRealtime=yes
 RestrictSUIDSGID=yes
 RuntimeMaxSec=10m
 Type=simple
-WorkingDirectory=/home/ubuntu/ubuntu-release-metrics/"""
+WorkingDirectory=/home/ubuntu/ubuntu-release-metrics/"""  # flake8: noqa: F401
         self.run_metric_collector_timer_template = """[Unit]
 Description=Run run-metric-collector@$METRIC.service on a timer
 After=timers.target
@@ -82,7 +81,10 @@ WantedBy=timers.target"""
                 ]
             )
         except CalledProcessError as e:
-            logger.debug("installing and updating packages failed with return code %d", e.returncode)
+            logger.debug(
+                "installing and updating packages failed with return code %d",
+                e.returncode,
+            )
             return
 
     def _copy_repo(self):
@@ -108,15 +110,19 @@ WantedBy=timers.target"""
                     raise Exception(f"{var} cannot be empty or None")
                 influx_vars.append(f"{var.upper()}={influx_value}")
             except Exception as e:
-                logger.error(f"writing influx creds to {self._influx_path} failed with {e}")
+                logger.error(
+                    f"writing influx creds to {self._influx_path} failed with {e}"
+                )
         self._influx_path.write_text("\n".join(influx_vars))
 
     def _setup_units(self, config: dict):
         logger.info("setting up ubuntu-release-metrics systemd units")
         # first, check for anything old under /etc/systemd/system and remove it
-        old_systemd_files = [f for f in pathlib.Path("/etc/systemd/system/").glob("run-metric-collector@*")]
+        old_systemd_files = [
+            f for f in Path("/etc/systemd/system/").glob("run-metric-collector@*")
+        ]
         for fl in old_systemd_files:
-            os.delete(fl)
+            os.remove(fl)
         # this is the set of juju config variables involved in the systemd units
         config_vars = [
             "dry_run",
@@ -125,7 +131,11 @@ WantedBy=timers.target"""
             "no_proxy",
         ]
         # list of metrics - each directory under metrics/collectors
-        metrics = [f for f in pathlib.Path(REPO_LOCATION / "metrics" / "collectors").glob('**/*') if f.is_dir()]
+        metrics = [
+            f
+            for f in Path(REPO_LOCATION / "metrics" / "collectors").glob("**/*")
+            if f.is_dir()
+        ]
         for metric in metrics:
             logger.info(f"setting up {metric} systemd unit and timer")
             try:
@@ -143,12 +153,16 @@ WantedBy=timers.target"""
                     "$METRIC",
                     metric,
                 )
-                service_file = self._systemd_dir / f"run-metric-collector@{metric}.service"
+                service_file = (
+                    self._systemd_dir / f"run-metric-collector@{metric}.service"
+                )
                 timer_file = self._systemd_dir / f"run-metric-collector@{metric}.timer"
                 service_file.write_text(metric_service_file)
                 timer_file.write_text(metric_timer_file)
             except Exception as e:
-                logger.error(f"failed to install {metric} systemd unit + timer, traceback:\n{e}")
+                logger.error(
+                    f"failed to install {metric} systemd unit + timer, traceback:\n{e}"
+                )
                 return
         # There is no need to restart services, since they're
         # periodically triggered and very short-lived.
