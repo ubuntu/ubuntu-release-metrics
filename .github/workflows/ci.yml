@@ -1,12 +1,17 @@
 name: Pull Request
 
 on:
+  pull_request:
+    branches:
+    - main
   push:
     branches:
-      - main
+    - main
 
 jobs:
   run-tests:
     uses: ./.github/workflows/pytest.yml
   linter:
     uses: ./.github/workflows/linter.yml
+  tflint:
+    uses: ./.github/workflows/tflint.yml
