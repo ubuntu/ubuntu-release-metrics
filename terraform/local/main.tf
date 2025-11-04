@@ -1,0 +1,11 @@
+terraform {
+  required_version = ">= 1.0"
+}
+
+module "ubuntu-release-metrics" {
+  source = "../modules/ubuntu-release-metrics/"
+  dry_run = true
+  http_proxy = ""
+  https_proxy = ""
+  no_proxy = ""
+}

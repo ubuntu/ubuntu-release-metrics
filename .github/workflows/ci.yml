@@ -8,3 +8,5 @@ jobs:
     uses: ./.github/workflows/pytest.yml
   linter:
     uses: ./.github/workflows/linter.yml
+  tflint:
+    uses: ./.github/workflows/tflint.yml
