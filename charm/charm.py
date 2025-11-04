@@ -4,11 +4,9 @@
 
 """Charm the release metrics."""
 
-import logging
-
 import ops
-
 from releasemetrics import ReleaseMetrics
+
 
 class ReleaseMetricsCharm(ops.CharmBase):
     """Charm the release metrics"""
@@ -27,17 +25,22 @@ class ReleaseMetricsCharm(ops.CharmBase):
 
     def _on_install(self, event: ops.InstallEvent):
         """Handle install event."""
-        self.unit.status = ops.MaintenanceStatus("installing ubuntu-release-metrics metric collectors")
+        self.unit.status = ops.MaintenanceStatus(
+            "installing ubuntu-release-metrics metric collectors"
+        )
         try:
             self._release_metrics.install(self.config)
         except Exception as e:
-            logger.error("failed to install ubuntu-release-metrics: %s", str(e))
-            self.unit.status = ops.BlockedStatus("failed installing ubuntu-release-metrics")
+            self.unit.status = ops.BlockedStatus(
+                f"failed installing ubuntu-release-metrics: {e}"
+            )
             return
 
         self.unit.status = ops.ActiveStatus("Ready")
 
     def _on_config_changed(self, event: ops.ConfigChangedEvent):
-        self.unit.status = ops.MaintenanceStatus("ubuntu-release-metrics charm configuration updated - updating unit")
+        self.unit.status = ops.MaintenanceStatus(
+            "ubuntu-release-metrics charm configuration updated - updating unit"
+        )
         self._release_metrics.configure(self.config)
         self.unit.status = ops.ActiveStatus("ready")

@@ -11,7 +11,7 @@ SPONSORING_QUEUE_URL = "http://sponsoring-reports.ubuntu.com/jsons/general.json"
 
 class SponsoringMetrics(Metric):
     def collect(self):
-        """ Collect the sponsoring queue details"""
+        """Collect the sponsoring queue details"""
         data = []
         set_age_items = {}
         datenow = datetime.datetime.now()

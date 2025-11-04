@@ -12,7 +12,7 @@ VERSIONS_STATS_URL = (
 
 class VersionsMetrics(Metric):
     def collect(self):
-        """ Collect the sponsoring queue details"""
+        """Collect the sponsoring queue details"""
         data = []
 
         known_reports_lst = []

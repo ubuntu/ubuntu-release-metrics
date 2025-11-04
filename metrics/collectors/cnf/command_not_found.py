@@ -9,6 +9,7 @@ import tempfile
 import urllib
 
 from launchpadlib.launchpad import Launchpad
+
 from metrics.lib.basemetric import Metric
 
 URL = "http://archive.ubuntu.com/ubuntu/dists/release/main/cnf/"
@@ -65,7 +66,10 @@ class CommandNotFoundMetric(Metric):
             data.append(
                 {
                     "measurement": "command_not_found_age",
-                    "fields": {"cnf_age": count, "out_of_date": (count > 1),},
+                    "fields": {
+                        "cnf_age": count,
+                        "out_of_date": (count > 1),
+                    },
                     "tags": {"release": s},
                 }
             )

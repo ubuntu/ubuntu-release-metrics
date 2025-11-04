@@ -6,6 +6,7 @@ import os
 import sys
 
 from influxdb import InfluxDBClient
+
 from metrics.lib.errors import CollectorError
 
 
