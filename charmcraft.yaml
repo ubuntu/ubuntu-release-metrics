@@ -1,0 +1,71 @@
+name: ubuntu-release-metrics
+type: charm
+title: Ubuntu Release Metrics
+summary: Metrics collectors for Ubuntu Release Management - to be sent to an InfluxDB hooked up to a Grafana dashboard
+description: |
+  Each metric collects data, and then sends it to an influxdb as specified in the juju config. The metrics can be run as a dry run.
+
+links:
+  source:
+    - https://github.com/ubuntu/ubuntu-release-metrics/
+
+platforms:
+  ubuntu@24.04:amd64:
+
+parts:
+  ubuntu-release-metrics:
+    source: .
+    plugin: dump
+  charm:
+    source: .
+    plugin: charm
+    charm-entrypoint: charm/charm.py
+    charm-requirements: [charm_requirements.txt]
+
+config:
+  options:
+    dry_run:
+      description: |
+        Run the metrics in dry run or not.
+      default: false
+      type: boolean
+    http_proxy:
+      description: |
+        http_proxy environment variable for the metrics collectors.
+      default: "http://squid.internal:3128"
+      type: string
+    https_proxy:
+      description: |
+        https_proxy environment variable for the metrics collectors.
+      default: "http://squid.internal:3128"
+      type: string
+    no_proxy:
+      description: |
+        no_proxy environment variable for the metrics collectors.
+      default: "127.0.0.1,::1,localhost,10.0.0.0/8,canonical.com,ubuntu.com,launchpad.net,internal"
+      type: string
+    influxdb_hostname:
+      description: |
+        hostname of influxdb server
+      default: "ubuntu-release-kpi-influx.internal"
+      type: string
+    influxdb_port:
+      description: |
+        port of influxdb server
+      default: 8086
+      type: int
+    influxdb_username:
+      description: |
+        username of influxdb server
+      default: "metrics"
+      type: string
+    influxdb_password:
+      description: |
+        password of influxdb server
+      default: "XXX"
+      type: string
+    influxdb_database:
+      description: |
+        database name on influxdb server
+      default: "metrics"
+      type: string
