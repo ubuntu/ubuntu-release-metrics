@@ -8,4 +8,5 @@ module "ubuntu-release-metrics" {
   http_proxy = ""
   https_proxy = ""
   no_proxy = ""
+  model_name = "release-metrics"
 }
