@@ -147,7 +147,7 @@ WantedBy=timers.target"""
                         raise Exception(f"{cfg_var} cannot be None in juju config")
                     metric_service_file = metric_service_file.replace(
                         f"${cfg_var.upper()}",
-                        cfg_value,
+                        str(cfg_value),
                     )
                 metric_timer_file = self.run_metric_collector_timer_template.replace(
                     "$METRIC",
