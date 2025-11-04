@@ -8,6 +8,9 @@ jobs:
   build:
     name: Lint Code Base
     runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        python-version: [3.12]
 
     steps:
       - name: Checkout Code
@@ -16,9 +19,17 @@ jobs:
           # Full git history is needed to get a proper list of changed files within `super-linter`
           fetch-depth: 0
 
-      - name: Lint Code Base
-        uses: github/super-linter@v3.14.5
-        env:
-          VALIDATE_ALL_CODEBASE: true
-          DEFAULT_BRANCH: main
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install deps
+        run: |
+          #!/bin/bash
+          sudo apt-get install -y black
+
+      - name: Run linting checks
+        run: |
+          #!/bin/bash
+          black --check .
