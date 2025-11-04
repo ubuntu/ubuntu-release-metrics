@@ -1,5 +1,8 @@
 name: Python package
 
+on:
+  workflow_call:
+
 jobs:
   build:
     runs-on: ubuntu-24.04

@@ -1,6 +1,9 @@
 ---
 name: Lint Code Base
 
+on:
+  workflow_call:
+
 jobs:
   build:
     name: Lint Code Base
