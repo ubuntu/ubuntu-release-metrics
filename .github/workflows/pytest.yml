@@ -1,14 +1,8 @@
 name: Python package
 
-on:
-  push:
-    branches: [ metrics ]
-  pull_request:
-    branches: [ metrics ]
-
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         python-version: [3.7, 3.8, 3.9]

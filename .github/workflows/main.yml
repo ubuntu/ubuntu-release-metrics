@@ -1,0 +1,12 @@
+name: Pull Request
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  run-tests:
+    uses: ./.github/workflows/pytest.yml
+  linter:
+    uses: ./.github/workflows/linter.yml
