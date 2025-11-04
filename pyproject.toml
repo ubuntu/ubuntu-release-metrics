@@ -1,0 +1,15 @@
+[project]
+name = "ubuntu-release-metrics-collector"
+requires-python = ">=3.8"
+dynamic = ["version"]
+
+[project.optional-dependencies]
+dev = [
+    "jubilant",
+    "pytest",
+    "requests",
+    "tenacity",
+]
+
+[tool.setuptools.dynamic]
+version = {attr = "src.ubuntu-release-metrics-collector.__version__"}

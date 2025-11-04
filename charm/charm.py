@@ -8,11 +8,11 @@ import ops
 from releasemetrics import ReleaseMetrics
 
 
-class ReleaseMetricsCharm(ops.CharmBase):
+class UbuntuReleaseMetricsCharm(ops.CharmBase):
     """Charm the release metrics"""
 
-    def __init__(self, *args):
-        super().__init__(*args)
+    def __init__(self, framework: ops.Framework):
+        super().__init__(framework)
         self._release_metrics = ReleaseMetrics()
 
         self.framework.observe(self.on.start, self._on_start)
@@ -21,6 +21,7 @@ class ReleaseMetricsCharm(ops.CharmBase):
 
     def _on_start(self, event: ops.StartEvent):
         """Handle start event."""
+        self.unit.set_workload_version("0.0.1")
         self.unit.status = ops.ActiveStatus()
 
     def _on_install(self, event: ops.InstallEvent):
@@ -44,3 +45,7 @@ class ReleaseMetricsCharm(ops.CharmBase):
         )
         self._release_metrics.configure(self.config)
         self.unit.status = ops.ActiveStatus("ready")
+
+
+if __name__ == "__main__":  # pragma: nocover
+    ops.main(UbuntuReleaseMetricsCharm)
