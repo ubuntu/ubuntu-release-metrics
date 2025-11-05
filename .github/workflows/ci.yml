@@ -16,3 +16,5 @@ jobs:
     uses: ./.github/workflows/linter.yml
   tflint:
     uses: ./.github/workflows/tflint.yml
+  build-charm:
+    uses: ./.github/workflows/build-charm.yml
