@@ -155,9 +155,9 @@ WantedBy=timers.target"""
                     str(metric),
                 )
                 service_file = (
-                    self._systemd_dir / f"run-metric-collector@{str(metric)}.service"
+                    self._systemd_dir / f"run-metric-collector@{metric.name}.service"
                 )
-                timer_file = self._systemd_dir / f"run-metric-collector@{str(metric)}.timer"
+                timer_file = self._systemd_dir / f"run-metric-collector@{metric.name}.timer"
                 service_file.write_text(metric_service_file)
                 timer_file.write_text(metric_timer_file)
             except Exception as e:
