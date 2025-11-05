@@ -106,7 +106,7 @@ WantedBy=timers.target"""
         influx_vars = []
         for var in config_vars:
             try:
-                influx_value = config.get("var", None)
+                influx_value = config.get(var, None)
                 if influx_value is None:
                     raise Exception(f"{var} cannot be empty or None")
                 influx_vars.append(f"{var.upper()}={influx_value}")
@@ -152,17 +152,17 @@ WantedBy=timers.target"""
                     )
                 metric_timer_file = self.run_metric_collector_timer_template.replace(
                     "$METRIC",
-                    metric,
+                    str(metric),
                 )
                 service_file = (
-                    self._systemd_dir / f"run-metric-collector@{metric}.service"
+                    self._systemd_dir / f"run-metric-collector@{str(metric)}.service"
                 )
-                timer_file = self._systemd_dir / f"run-metric-collector@{metric}.timer"
+                timer_file = self._systemd_dir / f"run-metric-collector@{str(metric)}.timer"
                 service_file.write_text(metric_service_file)
                 timer_file.write_text(metric_timer_file)
             except Exception as e:
                 logger.error(
-                    f"failed to install {metric} systemd unit + timer, traceback:\n{e}"
+                    f"failed to install {str(metric)} systemd unit + timer, traceback:\n{e}"
                 )
                 return
         # There is no need to restart services, since they're
