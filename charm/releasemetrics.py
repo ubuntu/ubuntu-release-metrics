@@ -154,7 +154,7 @@ WantedBy=timers.target"""
                     )
                 metric_timer_file = self.run_metric_collector_timer_template.replace(
                     "$METRIC",
-                    str(metric),
+                    metric.name,
                 )
                 service_file = (
                     self._systemd_dir / f"run-metric-collector@{metric.name}.service"
