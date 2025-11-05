@@ -106,7 +106,7 @@ WantedBy=timers.target"""
         for var in config_vars:
             try:
                 influx_value = config.get("var", None)
-                if influx_value is None or influx_value == "":
+                if influx_value is None:
                     raise Exception(f"{var} cannot be empty or None")
                 influx_vars.append(f"{var.upper()}={influx_value}")
             except Exception as e:
