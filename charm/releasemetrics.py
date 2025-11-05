@@ -170,7 +170,7 @@ WantedBy=timers.target"""
                 timer_file = self._systemd_dir / f"run-metric-collector@{metric.name}.timer"
                 service_file.write_text(metric_service_file)
                 timer_file.write_text(metric_timer_file)
-                services.append(f"run-metric-collector@{metric.name}.service")
+                services.append(f"run-metric-collector@{metric.name}")
             except Exception as e:
                 logger.error(
                     f"failed to install {str(metric)} systemd unit + timer, traceback:\n{e}"
@@ -181,4 +181,5 @@ WantedBy=timers.target"""
         # So we just reload the daemon.
         check_call(["systemctl", "daemon-reload"])
         for srvc in services:
-            check_call(["systemctl", "enable", srvc])
+            check_call(["systemctl", "enable", f"{srvc}.service"])
+            check_call(["systemctl", "enable", f"{srvc}.timer"])
