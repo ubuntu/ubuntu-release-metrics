@@ -47,7 +47,6 @@ Group=ubuntu
 WorkingDirectory=/home/ubuntu/ubuntu-release-metrics/"""  # flake8: noqa: F401
         self.run_metric_collector_timer_template = """[Unit]
 Description=Run run-metric-collector@$METRIC.service on a timer
-After=timers.target
 
 [Timer]
 OnBootSec=30s
@@ -182,4 +181,4 @@ WantedBy=timers.target"""
         check_call(["systemctl", "daemon-reload"])
         for srvc in services:
             check_call(["systemctl", "enable", f"{srvc}.service"])
-            check_call(["systemctl", "enable", f"{srvc}.timer"])
+            check_call(["systemctl", "enable", "--now", f"{srvc}.timer"])
