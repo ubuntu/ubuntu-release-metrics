@@ -10,6 +10,11 @@ variable "base" {
     default = "ubuntu@24.04"
 }
 
+variable "model_name" {
+    description = "name of juju model to deploy in"
+    type = string
+}
+
 variable "dry_run" {
     description = "dry run"
     type = bool

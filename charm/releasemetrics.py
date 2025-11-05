@@ -17,6 +17,9 @@ class ReleaseMetrics:
         self.run_metric_collector_service_template = f"""[Unit]
 Description=Run $METRIC metric
 
+[Install]
+WantedBy=multi-user.target
+
 [Service]
 DynamicUser=yes
 Environment=DRY_RUN=$DRY_RUN
@@ -39,10 +42,11 @@ RestrictRealtime=yes
 RestrictSUIDSGID=yes
 RuntimeMaxSec=10m
 Type=simple
+User=ubuntu
+Group=ubuntu
 WorkingDirectory=/home/ubuntu/ubuntu-release-metrics/"""  # flake8: noqa: F401
         self.run_metric_collector_timer_template = """[Unit]
 Description=Run run-metric-collector@$METRIC.service on a timer
-After=timers.target
 
 [Timer]
 OnBootSec=30s
@@ -55,6 +59,7 @@ Unit=run-metric-collector@$METRIC.service
 WantedBy=timers.target"""
 
     def install(self, config: dict):
+        logger.info(f"config:\n{config}")
         self._install_deps()
         self._copy_repo()
         self.configure(config)
@@ -105,8 +110,8 @@ WantedBy=timers.target"""
         influx_vars = []
         for var in config_vars:
             try:
-                influx_value = config.get("var", None)
-                if influx_value is None or influx_value == "":
+                influx_value = config.get(var, None)
+                if influx_value is None:
                     raise Exception(f"{var} cannot be empty or None")
                 influx_vars.append(f"{var.upper()}={influx_value}")
             except Exception as e:
@@ -136,6 +141,7 @@ WantedBy=timers.target"""
             for f in Path(REPO_LOCATION / "metrics" / "collectors").glob("**/*")
             if f.is_dir()
         ]
+        services = []
         for metric in metrics:
             logger.info(f"setting up {metric} systemd unit and timer")
             try:
@@ -147,24 +153,34 @@ WantedBy=timers.target"""
                         raise Exception(f"{cfg_var} cannot be None in juju config")
                     metric_service_file = metric_service_file.replace(
                         f"${cfg_var.upper()}",
-                        cfg_value,
+                        str(cfg_value),
                     )
+                metric_service_file = metric_service_file.replace(
+                    "$METRIC",
+                    metric.name,
+                )
                 metric_timer_file = self.run_metric_collector_timer_template.replace(
                     "$METRIC",
-                    metric,
+                    metric.name,
                 )
                 service_file = (
-                    self._systemd_dir / f"run-metric-collector@{metric}.service"
+                    self._systemd_dir / f"run-metric-collector@{metric.name}.service"
                 )
-                timer_file = self._systemd_dir / f"run-metric-collector@{metric}.timer"
+                timer_file = (
+                    self._systemd_dir / f"run-metric-collector@{metric.name}.timer"
+                )
                 service_file.write_text(metric_service_file)
                 timer_file.write_text(metric_timer_file)
+                services.append(f"run-metric-collector@{metric.name}")
             except Exception as e:
                 logger.error(
-                    f"failed to install {metric} systemd unit + timer, traceback:\n{e}"
+                    f"failed to install {str(metric)} systemd unit + timer, traceback:\n{e}"
                 )
                 return
         # There is no need to restart services, since they're
         # periodically triggered and very short-lived.
         # So we just reload the daemon.
         check_call(["systemctl", "daemon-reload"])
+        for srvc in services:
+            check_call(["systemctl", "enable", f"{srvc}.service"])
+            check_call(["systemctl", "enable", "--now", f"{srvc}.timer"])
