@@ -17,6 +17,9 @@ class ReleaseMetrics:
         self.run_metric_collector_service_template = f"""[Unit]
 Description=Run $METRIC metric
 
+[Install]
+WantedBy=multi-user.target
+
 [Service]
 DynamicUser=yes
 Environment=DRY_RUN=$DRY_RUN
@@ -139,6 +142,7 @@ WantedBy=timers.target"""
             for f in Path(REPO_LOCATION / "metrics" / "collectors").glob("**/*")
             if f.is_dir()
         ]
+        services = []
         for metric in metrics:
             logger.info(f"setting up {metric} systemd unit and timer")
             try:
@@ -162,6 +166,7 @@ WantedBy=timers.target"""
                 timer_file = self._systemd_dir / f"run-metric-collector@{metric.name}.timer"
                 service_file.write_text(metric_service_file)
                 timer_file.write_text(metric_timer_file)
+                services.append(f"run-metric-collector@{metric.name}.service")
             except Exception as e:
                 logger.error(
                     f"failed to install {str(metric)} systemd unit + timer, traceback:\n{e}"
@@ -171,3 +176,5 @@ WantedBy=timers.target"""
         # periodically triggered and very short-lived.
         # So we just reload the daemon.
         check_call(["systemctl", "daemon-reload"])
+        for srvc in services:
+            check_call(["systemctl", "enable", srvc])
