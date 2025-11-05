@@ -11,16 +11,12 @@ Influxdb database that the Grafana reads from.
 
 ## Architecture
 
-There are three branches in this repository:
-
-* `metrics`. The default branch which contains the scripts themselves. These
-  will be run periodically.
-* `charm`. This branch contains the Juju charm to deploy an instance which
-  checks out `metrics` and arranges for them to be run regularly.
-* `mojo`. This is [a delivery system for Juju
-  charms](https://mojo.canonical.com/). Most people won't need to touch this,
-  but the Mojo spec is run on a "controller" host to arrange to collect
-  secrets - the InfluxDB credentials - and deploy the charm.
+- `bin`: contains wrapper scripts to help run collectors in dry-run mode
+- `charm`: contains all charm code
+- `metrics`: contains the actual metric collector scripts
+- `terraform`: includes a terraform module for the release metrics as well as a local deployment configuration to test the terraform module - please note that the local terraform config pulls the charm from charmhub, not from a locally built charm
+- `tests`: unit tests for the metric collector scripts
+- `utils`: contains a wrapper script called `exec-metric` used by the executables in `bin`
 
 ## Writing a collector
 
@@ -60,13 +56,18 @@ The default value if you don't specify this is `5m`.
 
 ## Deploying the charm
 
-*This is for the deployment itself, and not any collectors which run inside it*.
+The charm is built, packed and deployed to Charmhub via Github actions on pushes
+to the `main` branch. To build locally, run `snap install charmcraft` and
+run `charmcraft pack`. You can test a locally built charm either by running
+`juju deploy ./my-charm-file.charm`, or by uploading the charm to Charmhub, on
+a suitable track (`latest/edge`), and then using the terraform local config to deploy it.
 
-You need to have access to the live environment, which means you need to be a
-Canonical employee.
+To do so, run:
+```
+charmcraft clean
+charmcraft pack
+charmcraft upload ubuntu-release-metrics_ubuntu@24.04-amd64.charm --name ubuntu-release-metrics-collector
+charmcraft release ubuntu-release-metrics-collector --revision=$REVISION --channel=latest/edge
+```
 
-Build the charm using `charmcraft build` (`charmcraft` comes from a snap:
-`snap install charmcraft`). Copy the output of the `build` directory to the
-`build` branch, and push it. Then execute `mojo run -m manifest-upgrade` in
-the live environment to re-run the Mojo spec (which anyone can see in the
-`mojo` branch here).
+For production deployments, store the terraform config elsewhere, as it will contain secrets.
