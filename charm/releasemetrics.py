@@ -156,6 +156,10 @@ WantedBy=timers.target"""
                         f"${cfg_var.upper()}",
                         str(cfg_value),
                     )
+                metric_service_file = metric_service_file.replace(
+                    "$METRIC",
+                    metric.name,
+                )
                 metric_timer_file = self.run_metric_collector_timer_template.replace(
                     "$METRIC",
                     metric.name,
