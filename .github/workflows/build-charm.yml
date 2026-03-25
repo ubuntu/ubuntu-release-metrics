@@ -49,7 +49,7 @@ jobs:
       - name: Upload charm artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: ubuntu-release-metrics.charm
+          name: ubuntu-release-metrics-collector.charm
           path: "*.charm"
 
       - name: Upload charm to charmhub
@@ -57,6 +57,6 @@ jobs:
         with:
           credentials: '${{ secrets.CHARMHUB_TOKEN }}'
           github-token: '${{ secrets.GITHUB_TOKEN }}'
-          tag-prefix: ubuntu-release-metrics
-          built-charm-path: ubuntu-release-metrics_ubuntu@24.04-amd64.charm
+          tag-prefix: ubuntu-release-metrics-collector
+          built-charm-path: ubuntu-release-metrics-collector_ubuntu@24.04-amd64.charm
         if: github.ref == 'refs/heads/main'
