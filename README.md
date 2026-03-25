@@ -66,7 +66,7 @@ To do so, run:
 ```
 charmcraft clean
 charmcraft pack
-charmcraft upload ubuntu-release-metrics_ubuntu@24.04-amd64.charm --name ubuntu-release-metrics-collector
+charmcraft upload ubuntu-release-metrics-collector_ubuntu@24.04-amd64.charm
 charmcraft release ubuntu-release-metrics-collector --revision=$REVISION --channel=latest/edge
 ```
 
