@@ -77,6 +77,6 @@ For production deployments, store the terraform config elsewhere, as it will con
 The CHARMCRAFT_TOKEN is what allows the CI to push the charm to charmhub. If it expires, you can refresh it with the following:
 
 ```
-charmcraft login --export=secrets.auth --charm=error-tracker  --permission=package-manage --permission=package-view --ttl=$((3600*24*365))
+charmcraft login --export=secrets.auth --charm=ubuntu-release-metrics-collector  --permission=package-manage --permission=package-view --ttl=$((3600*24*365))
 cat secrets.auth
 ```
