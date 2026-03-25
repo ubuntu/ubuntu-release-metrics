@@ -1,6 +1,6 @@
-name: ubuntu-release-metrics
+name: ubuntu-release-metrics-collector
 type: charm
-title: Ubuntu Release Metrics
+title: Ubuntu Release Metrics Collector
 summary: Metrics collectors for Ubuntu Release Management - to be sent to an InfluxDB hooked up to a Grafana dashboard
 description: |
   Each metric collects data, and then sends it to an influxdb as specified in the juju config. The metrics can be run as a dry run.
