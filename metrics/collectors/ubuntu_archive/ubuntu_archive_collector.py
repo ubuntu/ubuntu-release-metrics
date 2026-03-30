@@ -151,7 +151,47 @@ class UbuntuArchiveMetrics(Metric):
         )
         return data
 
+    def get_bug_stats(self):
+        data = []
+        self.log.debug("Getting bug stats for ubuntu-archive team")
+        try:
+            archive_team = self.lp.people["ubuntu-archive"]
+        except Exception as exc:
+            self.log.warning("Failed to fetch Launchpad team 'ubuntu-archive': %s", exc)
+            return data
+
+        try:
+            subscribed_bugs = archive_team.searchTasks(bug_subscriber=archive_team)
+            data.append(
+                {
+                    "measurement": "ubuntu_archive_bugs",
+                    "tags": {"type": "subscribed"},
+                    "fields": {"count": len(subscribed_bugs)},
+                }
+            )
+        except Exception as exc:
+            self.log.warning(
+                "Failed to fetch subscribed bug stats from Launchpad: %s", exc
+            )
+
+        try:
+            assigned_bugs = archive_team.searchTasks(assignee=archive_team)
+            data.append(
+                {
+                    "measurement": "ubuntu_archive_bugs",
+                    "tags": {"type": "assigned"},
+                    "fields": {"count": len(assigned_bugs)},
+                }
+            )
+        except Exception as exc:
+            self.log.warning(
+                "Failed to fetch assigned bug stats from Launchpad: %s", exc
+            )
+
+        return data
+
     def collect(self):
         nbs = self.get_nbs_stats()
         uninst = self.get_uninst_stats()
-        return nbs + uninst
+        bugs = self.get_bug_stats()
+        return nbs + uninst + bugs
