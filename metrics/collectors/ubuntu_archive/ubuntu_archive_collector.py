@@ -1,5 +1,6 @@
 # Copyright 2026 Canonical Ltd
 
+import re
 import tempfile
 
 import requests
@@ -10,6 +11,7 @@ from launchpadlib.launchpad import Launchpad
 from metrics.lib.basemetric import Metric
 
 NBS_CSV_URL = "https://ubuntu-archive-team.ubuntu.com/nbs.csv"
+PROPOSED_MIGRATION_URL = "https://ubuntu-archive-team.ubuntu.com/proposed-migration/"
 
 
 class UbuntuArchiveMetrics(Metric):
@@ -25,6 +27,9 @@ class UbuntuArchiveMetrics(Metric):
         self.ubuntu = self.lp.distributions["ubuntu"]
         self.active_series = {s.name: s for s in self.ubuntu.series if s.active}
         self.dev_series = self.ubuntu.current_series.name
+        self.architectures = [
+            arch.architecture_tag for arch in self.ubuntu.current_series.architectures
+        ]
 
     def get_nbs_stats(self):
         data = []
@@ -93,6 +98,60 @@ class UbuntuArchiveMetrics(Metric):
 
         return data
 
+    def get_uninst_stats(self):
+        data = []
+        url = PROPOSED_MIGRATION_URL + f"{self.dev_series}_uninst.txt"
+        self.log.debug("Downloading uninst report from %s", url)
+
+        try:
+            response = requests.get(url, timeout=60)
+            response.raise_for_status()
+        except requests.exceptions.RequestException as exc:
+            self.log.warning("Failed to download uninst report: %s", exc)
+            return []
+
+        text = response.text
+
+        # Parse the "* summary" section
+        summary_match = re.search(
+            r"\* summary\n(.*?)(?=\n# Generated:)", text, re.DOTALL
+        )
+        if not summary_match:
+            self.log.warning("Could not find summary section in uninst report")
+            return []
+
+        # Parse the generated timestamp
+        generated_match = re.search(r"# Generated:\s+(.+)", text)
+        if not generated_match:
+            self.log.warning("Could not find generated timestamp in uninst report")
+            return []
+
+        try:
+            generated_time = datetime.strptime(
+                generated_match.group(1).strip(), "%a, %d %b %Y %H:%M:%S %z"
+            )
+        except ValueError as exc:
+            self.log.warning("Failed to parse generated timestamp: %s", exc)
+            return []
+
+        counts_by_arch = {arch: 0 for arch in self.architectures}
+        for line in summary_match.group(1).splitlines():
+            m = re.match(r"^\s*(\d+)\s+(\S+)\s*$", line)
+            if m:
+                count, arch = int(m.group(1)), m.group(2)
+                counts_by_arch[arch] = count
+
+        data.append(
+            {
+                "measurement": "uninst_stats",
+                "tags": {"release": self.dev_series},
+                "time": generated_time,
+                "fields": counts_by_arch,
+            }
+        )
+        return data
+
     def collect(self):
         nbs = self.get_nbs_stats()
-        return nbs
+        uninst = self.get_uninst_stats()
+        return nbs + uninst
