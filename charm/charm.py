@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright 2025 ssstr1pe
+# Copyright 2025 Canonical
 # See LICENSE file for licensing details.
 
 """Charm the release metrics."""
