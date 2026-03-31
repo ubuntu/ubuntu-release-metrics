@@ -82,7 +82,7 @@ class ImagesMetrics(Metric):
                 # is found via other directories.
                 if path_table[0] == "ubuntu":
                     continue
-                # the path starts with a serie name then it's a desktop iso
+                # the path starts with a series name then it's a desktop iso
                 elif path_table[0] in self.active_series:
                     flavor = "ubuntu"
                 # or with 'daily-live'
