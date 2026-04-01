@@ -141,14 +141,15 @@ class UbuntuArchiveMetrics(Metric):
                 count, arch = int(m.group(1)), m.group(2)
                 counts_by_arch[arch] = count
 
-        data.append(
-            {
-                "measurement": "uninst_stats",
-                "tags": {"release": self.dev_series},
-                "time": generated_time,
-                "fields": counts_by_arch,
-            }
-        )
+        for arch, count in counts_by_arch.items():
+            data.append(
+                {
+                    "measurement": "uninst_stats",
+                    "tags": {"release": self.dev_series, "arch": arch},
+                    "time": generated_time,
+                    "fields": {"count": count},
+                }
+            )
         return data
 
     def get_bug_stats(self):
