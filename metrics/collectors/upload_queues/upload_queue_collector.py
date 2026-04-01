@@ -46,6 +46,41 @@ class UbuntuQueueMetrics(Metric):
                 )
         return measurements
 
+    def collect_new_queue_types(self):
+        """Count NEW uploads in Proposed split by upload types."""
+        measurements = []
+        for series in self.active_series:
+            uploads = self.active_series[series].getPackageUploads(
+                status="New", pocket="Proposed"
+            )
+            source_count = 0
+            binary_count = 0
+            sync_count = 0
+            for u in uploads:
+                if getattr(u, "contains_source", False):
+                    source_count += 1
+                if getattr(u, "contains_build", False):
+                    binary_count += 1
+                if getattr(u, "contains_copy", False):
+                    sync_count += 1
+            for upload_type, count in (
+                ("source", source_count),
+                ("binary", binary_count),
+                ("sync", sync_count),
+            ):
+                measurements.append(
+                    {
+                        "measurement": "ubuntu_new_queue_size",
+                        "fields": {"count": count},
+                        "tags": {
+                            "devel": self._is_devel(series),
+                            "release": series,
+                            "type": upload_type,
+                        },
+                    }
+                )
+        return measurements
+
     def queue_ages(self):
         """Determine age of UNAPPROVED/NEW uploads for proposed for each series."""
         from datetime import datetime
@@ -92,5 +127,6 @@ class UbuntuQueueMetrics(Metric):
     def collect(self):
         d1 = self.collect_queue_sizes()
         d2 = self.queue_ages()
+        d3 = self.collect_new_queue_types()
 
-        return d1 + d2
+        return d1 + d2 + d3
