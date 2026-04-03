@@ -45,30 +45,3 @@ config:
         no_proxy environment variable for the metrics collectors.
       default: "127.0.0.1,::1,localhost,10.0.0.0/8,canonical.com,ubuntu.com,launchpad.net,internal"
       type: string
-    influxdb_hostname:
-      description: |
-        Hostname of InfluxDB server
-
-        If empty, the charm will self host its own InfluxDB and expose it with a 'grafana' user with READ access.
-      default: ""
-      type: string
-    influxdb_port:
-      description: |
-        Port of InfluxDB server
-      default: 8086
-      type: int
-    influxdb_username:
-      description: |
-        Username with WRITE access to InfluxDB server
-      default: "collector"
-      type: string
-    influxdb_password:
-      description: |
-        Password for InfluxDB
-      default: ""
-      type: string
-    influxdb_database:
-      description: |
-        Database name for writing metrics on InfluxDB server
-      default: "metrics"
-      type: string
