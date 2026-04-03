@@ -58,13 +58,12 @@ Unit=run-metric-collector@$METRIC.service
 [Install]
 WantedBy=timers.target"""
 
-    def install(self, config: dict):
-        logger.info(f"config:\n{config}")
+    def install(self):
         self._install_deps()
         self._copy_repo()
-        self.configure(config)
 
     def configure(self, config: dict):
+        logger.info(f"config:\n{config}")
         self._write_influx_creds(config)
         self._setup_units(config)
 

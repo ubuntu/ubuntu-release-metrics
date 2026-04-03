@@ -3,14 +3,15 @@ type: charm
 title: Ubuntu Release Metrics Collector
 summary: Metrics collectors for Ubuntu Release Management - to be sent to an InfluxDB hooked up to a Grafana dashboard
 description: |
-  Each metric collects data, and then sends it to an influxdb as specified in the juju config. The metrics can be run as a dry run.
+  Each metric collects data, and then sends it to an InfluxDB as specified in the juju config. The metrics can be run as a dry run.
 
 links:
   source:
     - https://github.com/ubuntu/ubuntu-release-metrics/
 
+base: ubuntu@24.04
 platforms:
-  ubuntu@24.04:amd64:
+  amd64:
 
 parts:
   ubuntu-release-metrics:
@@ -46,26 +47,28 @@ config:
       type: string
     influxdb_hostname:
       description: |
-        hostname of influxdb server
-      default: "ubuntu-release-kpi-influx.internal"
+        Hostname of InfluxDB server
+
+        If empty, the charm will self host its own InfluxDB and expose it with a 'grafana' user with READ access.
+      default: ""
       type: string
     influxdb_port:
       description: |
-        port of influxdb server
+        Port of InfluxDB server
       default: 8086
       type: int
     influxdb_username:
       description: |
-        username of influxdb server
-      default: "metrics"
+        Username with WRITE access to InfluxDB server
+      default: "collector"
       type: string
     influxdb_password:
       description: |
-        password of influxdb server
-      default: "XXX"
+        Password for InfluxDB
+      default: ""
       type: string
     influxdb_database:
       description: |
-        database name on influxdb server
+        Database name for writing metrics on InfluxDB server
       default: "metrics"
       type: string

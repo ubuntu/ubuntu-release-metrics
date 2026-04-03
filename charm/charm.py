@@ -6,6 +6,8 @@
 
 import ops
 from releasemetrics import ReleaseMetrics
+from influxdb import InfluxDB
+from grafana import Grafana
 
 
 class UbuntuReleaseMetricsCharm(ops.CharmBase):
@@ -13,6 +15,8 @@ class UbuntuReleaseMetricsCharm(ops.CharmBase):
 
     def __init__(self, framework: ops.Framework):
         super().__init__(framework)
+        self._influxdb = InfluxDB()
+        self._grafana = Grafana()
         self._release_metrics = ReleaseMetrics()
 
         self.framework.observe(self.on.start, self._on_start)
@@ -29,13 +33,23 @@ class UbuntuReleaseMetricsCharm(ops.CharmBase):
         self.unit.status = ops.MaintenanceStatus(
             "installing ubuntu-release-metrics metric collectors"
         )
+        if not self.config.get("influxdb_hostname"):
+            # Self-host InfluxDB and Grafana
+            try:
+                self._influxdb.install()
+                self._grafana.install()
+            except Exception as e:
+                self.unit.status = ops.BlockedStatus(
+                    f"failed installing influxdb/grafana: {e}"
+                )
+                raise e
         try:
-            self._release_metrics.install(self.config)
+            self._release_metrics.install()
         except Exception as e:
             self.unit.status = ops.BlockedStatus(
                 f"failed installing ubuntu-release-metrics: {e}"
             )
-            return
+            raise e
 
         self.unit.status = ops.ActiveStatus("Ready")
 
@@ -43,7 +57,32 @@ class UbuntuReleaseMetricsCharm(ops.CharmBase):
         self.unit.status = ops.MaintenanceStatus(
             "ubuntu-release-metrics charm configuration updated - updating unit"
         )
-        self._release_metrics.configure(self.config)
+        influxdb_config = {}
+        if not self.config.get("influxdb_hostname"):
+            # Self-host InfluxDB and Grafana
+            try:
+                self._influxdb.configure(self.config)
+                influxdb_config["influxdb_hostname"] = self._influxdb.influxdb_hostname
+                influxdb_config["influxdb_port"] = self._influxdb.influxdb_port
+                influxdb_config["influxdb_username"] = self._influxdb.influxdb_username
+                influxdb_config["influxdb_password"] = self._influxdb.influxdb_password
+                influxdb_config["influxdb_database"] = self._influxdb.influxdb_database
+                self._grafana.configure(self.config)
+                self.unit.set_ports(
+                    self._influxdb.influxdb_port, self._grafana.grafana_port
+                )
+            except Exception as e:
+                self.unit.status = ops.BlockedStatus(
+                    f"failed configuring influxdb: {e}"
+                )
+                raise e
+        try:
+            self._release_metrics.configure({**self.config, **influxdb_config})
+        except Exception as e:
+            self.unit.status = ops.BlockedStatus(
+                f"failed configuring ubuntu-release-metrics: {e}"
+            )
+            raise e
         self.unit.status = ops.ActiveStatus("ready")
 
 
