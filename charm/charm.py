@@ -22,6 +22,10 @@ class UbuntuReleaseMetricsCharm(ops.CharmBase):
         self.framework.observe(self.on.start, self._on_start)
         self.framework.observe(self.on.install, self._on_install)
         self.framework.observe(self.on.config_changed, self._on_config_changed)
+        self.framework.observe(
+            self.on.get_influxdb_grafana_password_action,
+            self._get_influxdb_grafana_password,
+        )
 
     def _on_start(self, event: ops.StartEvent):
         """Handle start event."""
@@ -79,6 +83,11 @@ class UbuntuReleaseMetricsCharm(ops.CharmBase):
 
         self.unit.set_ports(self._influxdb.influxdb_port, self._grafana.grafana_port)
         self.unit.status = ops.ActiveStatus("ready")
+
+    def _get_influxdb_grafana_password(self, event: ops.ActionEvent):
+        event.set_results(
+            {"username": "grafana", "password": self._influxdb.grafana_password}
+        )
 
 
 if __name__ == "__main__":  # pragma: nocover

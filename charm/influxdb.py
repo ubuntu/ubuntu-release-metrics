@@ -12,6 +12,18 @@ HOME = Path("~ubuntu").expanduser()
 
 
 class InfluxDB:
+    def __init__(self):
+        # For use by caller
+        self.admin_password = self._get_password("admin")
+        self.collector_password = self._get_password("collector")
+        self.grafana_password = self._get_password("grafana")
+
+        self.influxdb_hostname = "localhost"
+        self.influxdb_port = 8086
+        self.influxdb_username = "collector"
+        self.influxdb_password = self.collector_password
+        self.influxdb_database = "metrics"
+
     def install(self):
         self._install_deps()
 
@@ -21,18 +33,19 @@ class InfluxDB:
         self._setup_database()
         self._enable_http()
 
+    def _get_password(self, username):
+        password_path = Path(f"/root/.influx_{username}_password")
+        if password_path.exists():
+            logger.info(f"Reading password from {password_path}")
+            return password_path.read_text().strip()
+        password = "".join(
+            secrets.choice(string.ascii_letters + string.digits) for _ in range(20)
+        )
+        logger.info(f"Saving new password to {password_path}")
+        password_path.write_text(password)
+        return password
+
     def _setup_database(self):
-        self.admin_password = self._get_password("admin")
-        self.collector_password = self._get_password("collector")
-        self.grafana_password = self._get_password("grafana")
-
-        # For use by caller
-        self.influxdb_hostname = "localhost"
-        self.influxdb_port = 8086
-        self.influxdb_username = "collector"
-        self.influxdb_password = self.collector_password
-        self.influxdb_database = "metrics"
-
         grafana_password_path = HOME / "influxdb_grafana_password"
 
         if grafana_password_path.exists():
@@ -130,18 +143,6 @@ class InfluxDB:
         logger.info(f"Writing new InfluxDB config to {config_path}")
         config_path.write_text(new_config)
         check_call(["systemctl", "restart", "influxdb"])
-
-    def _get_password(self, username):
-        password_path = Path(f"/root/.influx_{username}_password")
-        if password_path.exists():
-            logger.info(f"Reading password from {password_path}")
-            return password_path.read_text().strip()
-        password = "".join(
-            secrets.choice(string.ascii_letters + string.digits) for _ in range(20)
-        )
-        logger.info(f"Saving new password to {password_path}")
-        password_path.write_text(password)
-        return password
 
     def _install_deps(self):
         try:

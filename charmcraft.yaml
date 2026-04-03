@@ -23,6 +23,11 @@ parts:
     charm-entrypoint: charm/charm.py
     charm-requirements: [charm_requirements.txt]
 
+actions:
+  get-influxdb-grafana-password:
+    description: Get the password for the 'grafana' user to connect to the self-hosted InfluxDB
+    additionalProperties: false
+
 config:
   options:
     dry_run:

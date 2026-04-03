@@ -8,11 +8,14 @@ HOME = Path("~ubuntu").expanduser()
 
 
 class Grafana:
+    def __init__(self):
+        # For use by caller
+        self.grafana_port = 3000
+
     def install(self):
         self._install_deps()
 
     def configure(self, config: dict):
-        self.grafana_port = 3000
         logger.info(f"config:\n{config}")
         logger.info("no-op")
 
