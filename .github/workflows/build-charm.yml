@@ -2,6 +2,9 @@ name: Check charm builds and upload to charmhub if on main branch workflow
 
 on:
   workflow_call:
+    secrets:
+      CHARMHUB_TOKEN:
+        required: true
 
 jobs:
   pack-charm:
@@ -54,6 +57,8 @@ jobs:
 
       - name: Upload charm to charmhub
         uses: canonical/charming-actions/upload-charm@1753e0803f70445132e92acd45c905aba6473225 # 2.7.0
+        env:
+          CHARMCRAFT_AUTH: '${{ secrets.CHARMHUB_TOKEN }}'
         with:
           credentials: '${{ secrets.CHARMHUB_TOKEN }}'
           github-token: '${{ secrets.GITHUB_TOKEN }}'

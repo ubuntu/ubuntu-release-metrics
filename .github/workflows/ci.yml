@@ -18,3 +18,5 @@ jobs:
     uses: ./.github/workflows/tflint.yml
   build-charm:
     uses: ./.github/workflows/build-charm.yml
+    secrets:
+      CHARMHUB_TOKEN: ${{ secrets.CHARMHUB_TOKEN }}
