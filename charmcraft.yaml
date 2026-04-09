@@ -45,18 +45,3 @@ config:
         Run the metrics in dry run or not.
       default: false
       type: boolean
-    http_proxy:
-      description: |
-        http_proxy environment variable for the metrics collectors.
-      default: "http://squid.internal:3128"
-      type: string
-    https_proxy:
-      description: |
-        https_proxy environment variable for the metrics collectors.
-      default: "http://squid.internal:3128"
-      type: string
-    no_proxy:
-      description: |
-        no_proxy environment variable for the metrics collectors.
-      default: "127.0.0.1,::1,localhost,10.0.0.0/8,canonical.com,ubuntu.com,launchpad.net,internal"
-      type: string

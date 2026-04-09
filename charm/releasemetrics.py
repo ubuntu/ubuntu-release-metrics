@@ -25,9 +25,6 @@ WantedBy=multi-user.target
 [Service]
 DynamicUser=yes
 Environment=DRY_RUN=$DRY_RUN
-Environment=http_proxy=$HTTP_PROXY
-Environment=https_proxy=$HTTPS_PROXY
-Environment=no_proxy=$NO_PROXY
 EnvironmentFile={str(self._influx_path)}
 ExecStart=/usr/bin/python3 -c 'from metrics.collectors.$METRIC import run_metric; run_metric(dry_run=$DRY_RUN, verbose=True)'
 NoNewPrivileges=yes
@@ -126,9 +123,6 @@ WantedBy=timers.target"""
         # this is the set of juju config variables involved in the systemd units
         config_vars = [
             "dry_run",
-            "http_proxy",
-            "https_proxy",
-            "no_proxy",
         ]
         # list of metrics - each directory under metrics/collectors
         metrics = [
