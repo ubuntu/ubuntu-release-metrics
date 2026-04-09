@@ -2,7 +2,9 @@ import logging
 import os
 import shutil
 from pathlib import Path
-from subprocess import CalledProcessError, check_call
+from subprocess import check_call
+
+from charmlibs import apt
 
 logger = logging.getLogger(__name__)
 
@@ -69,25 +71,19 @@ WantedBy=timers.target"""
 
     def _install_deps(self):
         try:
-            logger.info("running apt update")
-            check_call(["apt-get", "update", "-y"])
-            logger.info("running apt upgrade")
-            check_call(["apt-get", "upgrade", "-y"])
             logger.info("installing dependencies")
-            check_call(
+            apt.add_package(
                 [
-                    "apt-get",
-                    "install",
-                    "-y",
                     "git",
                     "python3-influxdb",
                     "python3-launchpadlib",
-                ]
+                ],
+                update_cache=True,
             )
-        except CalledProcessError as e:
+        except apt.PackageError as e:
             logger.debug(
-                "installing and updating packages failed with return code %d",
-                e.returncode,
+                "installing and updating packages failed: %s",
+                e,
             )
             raise e
 

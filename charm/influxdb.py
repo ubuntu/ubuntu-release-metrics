@@ -3,8 +3,10 @@ import os
 import secrets
 import string
 from pathlib import Path
-from subprocess import CalledProcessError, check_call
+from subprocess import check_call
 from textwrap import dedent
+
+from charmlibs import apt
 
 logger = logging.getLogger(__name__)
 
@@ -135,23 +137,14 @@ class InfluxDB:
 
     def _install_deps(self):
         try:
-            logger.info("running apt update")
-            check_call(["apt-get", "update", "-y"])
-            logger.info("running apt upgrade")
-            check_call(["apt-get", "upgrade", "-y"])
             logger.info("installing dependencies")
-            check_call(
-                [
-                    "apt-get",
-                    "install",
-                    "-y",
-                    "influxdb",
-                    "influxdb-client",
-                ]
+            apt.add_package(
+                ["influxdb", "influxdb-client"],
+                update_cache=True,
             )
-        except CalledProcessError as e:
+        except apt.PackageError as e:
             logger.debug(
-                "installing and updating packages failed with return code %d",
-                e.returncode,
+                "installing and updating packages failed: %s",
+                e,
             )
             raise e
