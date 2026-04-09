@@ -28,4 +28,4 @@ class Grafana:
                 "installing packages failed with return code %d",
                 e.returncode,
             )
-            return
+            raise e

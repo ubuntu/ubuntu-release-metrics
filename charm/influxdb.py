@@ -165,4 +165,4 @@ class InfluxDB:
                 "installing and updating packages failed with return code %d",
                 e.returncode,
             )
-            return
+            raise e

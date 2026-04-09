@@ -89,7 +89,7 @@ WantedBy=timers.target"""
                 "installing and updating packages failed with return code %d",
                 e.returncode,
             )
-            return
+            raise e
 
     def _copy_repo(self):
         logger.info("copying source code...")
