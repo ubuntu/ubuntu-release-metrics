@@ -57,12 +57,10 @@ Unit=run-metric-collector@$METRIC.service
 [Install]
 WantedBy=timers.target"""
 
-    def install(self):
-        self._install_deps()
-        self._copy_repo()
-
     def configure(self, config: dict):
         logger.info(f"config:\n{config}")
+        self._install_deps()
+        self._copy_repo()
         self._write_influx_creds(config)
         self._setup_units(config)
 
@@ -86,7 +84,7 @@ WantedBy=timers.target"""
 
     def _copy_repo(self):
         logger.info("copying source code...")
-        shutil.copytree(".", REPO_LOCATION)
+        shutil.copytree(".", REPO_LOCATION, dirs_exist_ok=True)
         check_call(["chown", "-R", "ubuntu:ubuntu", str(REPO_LOCATION)])
 
     def _write_influx_creds(self, config: dict):
