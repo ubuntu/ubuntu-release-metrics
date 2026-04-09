@@ -54,25 +54,14 @@ class InfluxDB:
 
         def _run_influx(command):
             check_call(
-                [
-                    "influx",
-                    "-username",
-                    "admin",
-                    "-password",
-                    self.admin_password,
-                    "-execute",
-                    command,
-                ]
+                # This function is called before auth is enforced, so no need to supply credentials
+                ["influx", "-execute", command]
             )
 
         logger.info("Creating InfluxDB 'admin' user")
         # Create admin user
-        check_call(
-            [
-                "influx",
-                "-execute",
-                f"CREATE USER admin WITH PASSWORD '{self.admin_password}' WITH ALL PRIVILEGES",
-            ]
+        _run_influx(
+            f"CREATE USER admin WITH PASSWORD '{self.admin_password}' WITH ALL PRIVILEGES"
         )
 
         # Create metrics DB
