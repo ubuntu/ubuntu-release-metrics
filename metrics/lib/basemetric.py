@@ -62,7 +62,7 @@ class Metric:
             self.log.debug(f"Connecting to influxdb at {hostname}:{port}...")
 
             self.influx_client = InfluxDBClient(
-                hostname, port, username, password, database
+                hostname, port, username, password, database, ssl=True, verify_ssl=False
             )
         else:
             self.log.info("Running in dry-run mode.")
