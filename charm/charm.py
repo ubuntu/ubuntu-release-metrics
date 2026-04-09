@@ -5,7 +5,12 @@
 """Charm the release metrics."""
 
 import ops
+
+from charms.traefik_k8s.v2.ingress import IngressPerAppRequirer as IngressRequirer
+
 from releasemetrics import ReleaseMetrics
+from influxdb import InfluxDB
+from grafana import Grafana
 
 
 class UbuntuReleaseMetricsCharm(ops.CharmBase):
@@ -13,38 +18,80 @@ class UbuntuReleaseMetricsCharm(ops.CharmBase):
 
     def __init__(self, framework: ops.Framework):
         super().__init__(framework)
+        self._influxdb = InfluxDB()
+        self._grafana = Grafana()
         self._release_metrics = ReleaseMetrics()
 
-        self.framework.observe(self.on.start, self._on_start)
+        self.ingress = IngressRequirer(
+            self,
+            port=self._grafana.grafana_port,
+            strip_prefix=True,
+            relation_name="ingress",
+        )
+
         self.framework.observe(self.on.install, self._on_install)
         self.framework.observe(self.on.config_changed, self._on_config_changed)
-
-    def _on_start(self, event: ops.StartEvent):
-        """Handle start event."""
-        self.unit.set_workload_version("0.0.1")
-        self.unit.status = ops.ActiveStatus()
+        self.framework.observe(
+            self.on.get_influxdb_grafana_password_action,
+            self._get_influxdb_grafana_password,
+        )
 
     def _on_install(self, event: ops.InstallEvent):
         """Handle install event."""
-        self.unit.status = ops.MaintenanceStatus(
-            "installing ubuntu-release-metrics metric collectors"
-        )
+        self.unit.status = ops.MaintenanceStatus("installing ubuntu-release-metrics")
         try:
-            self._release_metrics.install(self.config)
+            self._influxdb.install()
         except Exception as e:
-            self.unit.status = ops.BlockedStatus(
-                f"failed installing ubuntu-release-metrics: {e}"
-            )
-            return
+            self.unit.status = ops.BlockedStatus(f"failed installing influxdb: {e}")
+            raise e
+        try:
+            self._grafana.install()
+        except Exception as e:
+            self.unit.status = ops.BlockedStatus(f"failed installing grafana: {e}")
+            raise e
+        try:
+            self._release_metrics.install()
+        except Exception as e:
+            self.unit.status = ops.BlockedStatus(f"failed installing collector: {e}")
+            raise e
 
         self.unit.status = ops.ActiveStatus("Ready")
 
     def _on_config_changed(self, event: ops.ConfigChangedEvent):
-        self.unit.status = ops.MaintenanceStatus(
-            "ubuntu-release-metrics charm configuration updated - updating unit"
-        )
-        self._release_metrics.configure(self.config)
+        self.unit.status = ops.MaintenanceStatus("rolling out configuration")
+
+        influxdb_config = {}
+
+        try:
+            self._influxdb.configure(self.config)
+            influxdb_config["influxdb_hostname"] = self._influxdb.influxdb_hostname
+            influxdb_config["influxdb_port"] = self._influxdb.influxdb_port
+            influxdb_config["influxdb_username"] = self._influxdb.influxdb_username
+            influxdb_config["influxdb_password"] = self._influxdb.influxdb_password
+            influxdb_config["influxdb_database"] = self._influxdb.influxdb_database
+        except Exception as e:
+            self.unit.status = ops.BlockedStatus(f"failed configuring influxdb: {e}")
+            raise e
+
+        try:
+            self._grafana.configure(self.config)
+        except Exception as e:
+            self.unit.status = ops.BlockedStatus(f"failed configuring grafana: {e}")
+            raise e
+
+        try:
+            self._release_metrics.configure({**self.config, **influxdb_config})
+        except Exception as e:
+            self.unit.status = ops.BlockedStatus(f"failed configuring collector: {e}")
+            raise e
+
+        self.unit.set_ports(self._grafana.grafana_port)
         self.unit.status = ops.ActiveStatus("ready")
+
+    def _get_influxdb_grafana_password(self, event: ops.ActionEvent):
+        event.set_results(
+            {"username": "grafana", "password": self._influxdb.grafana_password}
+        )
 
 
 if __name__ == "__main__":  # pragma: nocover

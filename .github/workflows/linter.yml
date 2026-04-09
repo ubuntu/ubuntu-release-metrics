@@ -32,4 +32,4 @@ jobs:
       - name: Run linting checks
         run: |
           #!/bin/bash
-          black --check .
+          black --check --extend-exclude '/lib' .

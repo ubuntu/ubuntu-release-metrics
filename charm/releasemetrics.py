@@ -2,7 +2,9 @@ import logging
 import os
 import shutil
 from pathlib import Path
-from subprocess import CalledProcessError, check_call
+from subprocess import check_call
+
+from charmlibs import apt
 
 logger = logging.getLogger(__name__)
 
@@ -23,9 +25,6 @@ WantedBy=multi-user.target
 [Service]
 DynamicUser=yes
 Environment=DRY_RUN=$DRY_RUN
-Environment=http_proxy=$HTTP_PROXY
-Environment=https_proxy=$HTTPS_PROXY
-Environment=no_proxy=$NO_PROXY
 EnvironmentFile={str(self._influx_path)}
 ExecStart=/usr/bin/python3 -c 'from metrics.collectors.$METRIC import run_metric; run_metric(dry_run=$DRY_RUN, verbose=True)'
 NoNewPrivileges=yes
@@ -58,43 +57,34 @@ Unit=run-metric-collector@$METRIC.service
 [Install]
 WantedBy=timers.target"""
 
-    def install(self, config: dict):
+    def configure(self, config: dict):
         logger.info(f"config:\n{config}")
         self._install_deps()
         self._copy_repo()
-        self.configure(config)
-
-    def configure(self, config: dict):
         self._write_influx_creds(config)
         self._setup_units(config)
 
     def _install_deps(self):
         try:
-            logger.info("running apt update")
-            check_call(["apt-get", "update", "-y"])
-            logger.info("running apt upgrade")
-            check_call(["apt-get", "upgrade", "-y"])
             logger.info("installing dependencies")
-            check_call(
+            apt.add_package(
                 [
-                    "apt-get",
-                    "install",
-                    "-y",
                     "git",
                     "python3-influxdb",
                     "python3-launchpadlib",
-                ]
+                ],
+                update_cache=True,
             )
-        except CalledProcessError as e:
+        except apt.PackageError as e:
             logger.debug(
-                "installing and updating packages failed with return code %d",
-                e.returncode,
+                "installing and updating packages failed: %s",
+                e,
             )
-            return
+            raise e
 
     def _copy_repo(self):
         logger.info("copying source code...")
-        shutil.copytree(".", REPO_LOCATION)
+        shutil.copytree(".", REPO_LOCATION, dirs_exist_ok=True)
         check_call(["chown", "-R", "ubuntu:ubuntu", str(REPO_LOCATION)])
 
     def _write_influx_creds(self, config: dict):
@@ -131,9 +121,6 @@ WantedBy=timers.target"""
         # this is the set of juju config variables involved in the systemd units
         config_vars = [
             "dry_run",
-            "http_proxy",
-            "https_proxy",
-            "no_proxy",
         ]
         # list of metrics - each directory under metrics/collectors
         metrics = [
