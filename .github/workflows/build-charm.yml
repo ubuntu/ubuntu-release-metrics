@@ -63,5 +63,5 @@ jobs:
           credentials: '${{ secrets.CHARMHUB_TOKEN }}'
           github-token: '${{ secrets.GITHUB_TOKEN }}'
           tag-prefix: ubuntu-release-metrics-collector
-          built-charm-path: ubuntu-release-metrics-collector_ubuntu@24.04-amd64.charm
+          built-charm-path: ubuntu-release-metrics-collector_amd64.charm
         if: github.ref == 'refs/heads/main'
