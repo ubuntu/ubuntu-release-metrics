@@ -49,11 +49,6 @@ class UbuntuReleaseMetricsCharm(ops.CharmBase):
         except Exception as e:
             self.unit.status = ops.BlockedStatus(f"failed installing grafana: {e}")
             raise e
-        try:
-            self._release_metrics.install()
-        except Exception as e:
-            self.unit.status = ops.BlockedStatus(f"failed installing collector: {e}")
-            raise e
 
         self.unit.status = ops.ActiveStatus("Ready")
 
