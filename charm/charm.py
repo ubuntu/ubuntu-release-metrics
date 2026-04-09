@@ -29,18 +29,12 @@ class UbuntuReleaseMetricsCharm(ops.CharmBase):
             relation_name="ingress",
         )
 
-        self.framework.observe(self.on.start, self._on_start)
         self.framework.observe(self.on.install, self._on_install)
         self.framework.observe(self.on.config_changed, self._on_config_changed)
         self.framework.observe(
             self.on.get_influxdb_grafana_password_action,
             self._get_influxdb_grafana_password,
         )
-
-    def _on_start(self, event: ops.StartEvent):
-        """Handle start event."""
-        self.unit.set_workload_version("0.0.1")
-        self.unit.status = ops.ActiveStatus()
 
     def _on_install(self, event: ops.InstallEvent):
         """Handle install event."""
