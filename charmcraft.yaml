@@ -13,6 +13,10 @@ base: ubuntu@24.04
 platforms:
   amd64:
 
+charm-libs:
+  - lib: traefik_k8s.ingress
+    version: "2"
+
 parts:
   ubuntu-release-metrics:
     source: .
@@ -22,6 +26,12 @@ parts:
     plugin: charm
     charm-entrypoint: charm/charm.py
     charm-requirements: [charm_requirements.txt]
+
+requires:
+  ingress:
+    interface: ingress
+    limit: 1
+    optional: true
 
 actions:
   get-influxdb-grafana-password:

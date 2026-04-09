@@ -5,6 +5,9 @@
 """Charm the release metrics."""
 
 import ops
+
+from charms.traefik_k8s.v2.ingress import IngressPerAppRequirer as IngressRequirer
+
 from releasemetrics import ReleaseMetrics
 from influxdb import InfluxDB
 from grafana import Grafana
@@ -18,6 +21,13 @@ class UbuntuReleaseMetricsCharm(ops.CharmBase):
         self._influxdb = InfluxDB()
         self._grafana = Grafana()
         self._release_metrics = ReleaseMetrics()
+
+        self.ingress = IngressRequirer(
+            self,
+            port=self._grafana.grafana_port,
+            strip_prefix=True,
+            relation_name="ingress",
+        )
 
         self.framework.observe(self.on.start, self._on_start)
         self.framework.observe(self.on.install, self._on_install)
@@ -81,7 +91,7 @@ class UbuntuReleaseMetricsCharm(ops.CharmBase):
             self.unit.status = ops.BlockedStatus(f"failed configuring collector: {e}")
             raise e
 
-        self.unit.set_ports(self._influxdb.influxdb_port, self._grafana.grafana_port)
+        self.unit.set_ports(self._grafana.grafana_port)
         self.unit.status = ops.ActiveStatus("ready")
 
     def _get_influxdb_grafana_password(self, event: ops.ActionEvent):
