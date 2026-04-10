@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+from textwrap import dedent
 from subprocess import CalledProcessError, check_call
 
 logger = logging.getLogger(__name__)
@@ -17,7 +18,17 @@ class Grafana:
 
     def configure(self, config: dict):
         logger.info(f"config:\n{config}")
-        logger.info("no-op")
+        grafana_conf = Path("/var/snap/grafana/current/conf/grafana.ini")
+        grafana_conf.parent.mkdir(exist_ok=True, parents=True)
+        grafana_conf.write_text(
+            dedent(
+                """
+                [auth.anonymous]
+                enabled = true
+                """
+            )
+        )
+        check_call(["systemctl", "restart", "snap.grafana.grafana.service"])
 
     def _install_deps(self):
         try:
