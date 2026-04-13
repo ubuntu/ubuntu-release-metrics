@@ -98,16 +98,15 @@ class UbuntuArchiveMetrics(Metric):
 
         return data
 
-    def get_uninst_stats(self):
+    def _get_byarch_report_stats(self, url, measurement):
         data = []
-        url = PROPOSED_MIGRATION_URL + f"{self.dev_series}_uninst.txt"
-        self.log.debug("Downloading uninst report from %s", url)
+        self.log.debug("Downloading %s report from %s", measurement, url)
 
         try:
             response = requests.get(url, timeout=60)
             response.raise_for_status()
         except requests.exceptions.RequestException as exc:
-            self.log.warning("Failed to download uninst report: %s", exc)
+            self.log.warning("Failed to download %s report: %s", measurement, exc)
             return []
 
         text = response.text
@@ -117,13 +116,15 @@ class UbuntuArchiveMetrics(Metric):
             r"\* summary\n(.*?)(?=\n# Generated:)", text, re.DOTALL
         )
         if not summary_match:
-            self.log.warning("Could not find summary section in uninst report")
+            self.log.warning("Could not find summary section in %s report", measurement)
             return []
 
         # Parse the generated timestamp
         generated_match = re.search(r"# Generated:\s+(.+)", text)
         if not generated_match:
-            self.log.warning("Could not find generated timestamp in uninst report")
+            self.log.warning(
+                "Could not find generated timestamp in %s report", measurement
+            )
             return []
 
         try:
@@ -144,13 +145,21 @@ class UbuntuArchiveMetrics(Metric):
         for arch, count in counts_by_arch.items():
             data.append(
                 {
-                    "measurement": "uninst_stats",
+                    "measurement": measurement,
                     "tags": {"release": self.dev_series, "arch": arch},
                     "time": generated_time,
                     "fields": {"count": count},
                 }
             )
         return data
+
+    def get_uninst_stats(self):
+        url = PROPOSED_MIGRATION_URL + f"{self.dev_series}_uninst.txt"
+        return self._get_byarch_report_stats(url, "uninst_stats")
+
+    def get_outdate_stats(self):
+        url = PROPOSED_MIGRATION_URL + f"{self.dev_series}_outdate.txt"
+        return self._get_byarch_report_stats(url, "outdate_stats")
 
     def get_bug_stats(self):
         data = []
@@ -194,5 +203,6 @@ class UbuntuArchiveMetrics(Metric):
     def collect(self):
         nbs = self.get_nbs_stats()
         uninst = self.get_uninst_stats()
+        outdate = self.get_outdate_stats()
         bugs = self.get_bug_stats()
-        return nbs + uninst + bugs
+        return nbs + uninst + outdate + bugs
