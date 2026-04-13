@@ -53,8 +53,9 @@ class ImagesMetrics(Metric):
                             "/tmp",
                         ],
                         text=True,
+                        timeout=10,  # 10s is already plenty!
                     )
-                except subprocess.CalledProcessError as e:
+                except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
                     self.log.error("rsync call failed: %s", e.output)
         return rsync
 
