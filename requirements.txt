@@ -1,4 +1,7 @@
+beautifulsoup4
 distro-info
 influxdb
 launchpadlib
+lxml
 PyYAML
+requests

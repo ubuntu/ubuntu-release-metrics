@@ -70,8 +70,11 @@ WantedBy=timers.target"""
             apt.add_package(
                 [
                     "git",
+                    "python3-bs4",
                     "python3-influxdb",
                     "python3-launchpadlib",
+                    "python3-lxml",
+                    "python3-requests",
                 ],
                 update_cache=True,
             )
