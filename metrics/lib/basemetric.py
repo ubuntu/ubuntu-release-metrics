@@ -74,8 +74,8 @@ class Metric:
         data = self.collect()
 
         if self.dry_run:
-            import pprint
+            import yaml
 
-            self.log.info(f"[dry-run] Would submit: {pprint.pformat(data)}")
+            self.log.info("[dry-run] Would submit:\n" + yaml.dump(data, default_flow_style=False))
         else:
             self.influx_client.write_points(data)
