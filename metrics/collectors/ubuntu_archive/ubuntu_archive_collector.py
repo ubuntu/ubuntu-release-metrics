@@ -12,6 +12,9 @@ from metrics.lib.basemetric import Metric
 
 NBS_CSV_URL = "https://ubuntu-archive-team.ubuntu.com/nbs.csv"
 PROPOSED_MIGRATION_URL = "https://ubuntu-archive-team.ubuntu.com/proposed-migration/"
+PRIORITY_MISMATCHES_URL = (
+    "https://ubuntu-archive-team.ubuntu.com/priority-mismatches.txt"
+)
 
 
 class UbuntuArchiveMetrics(Metric):
@@ -161,6 +164,71 @@ class UbuntuArchiveMetrics(Metric):
         url = PROPOSED_MIGRATION_URL + f"{self.dev_series}_outdate.txt"
         return self._get_byarch_report_stats(url, "outdate_stats")
 
+    def get_priority_mismatch_stats(self):
+        data = []
+        self.log.debug("Downloading priority mismatches report")
+
+        try:
+            response = requests.get(PRIORITY_MISMATCHES_URL, timeout=60)
+            response.raise_for_status()
+        except requests.exceptions.RequestException as exc:
+            self.log.warning("Failed to download priority mismatches report: %s", exc)
+            return []
+
+        text = response.text
+
+        # Parse the generated timestamp
+        generated_match = re.search(r"Generated:\s+(.+)", text)
+        if not generated_match:
+            self.log.warning(
+                "Could not find generated timestamp in priority mismatches report"
+            )
+            return []
+
+        try:
+            ts_str = generated_match.group(1).strip().replace(" GMT ", " ")
+            generated_time = datetime.strptime(ts_str, "%a %b %d %H:%M:%S %Y").replace(
+                tzinfo=timezone.utc
+            )
+        except ValueError as exc:
+            self.log.warning("Failed to parse generated timestamp: %s", exc)
+            return []
+
+        counts_by_arch = {arch: 0 for arch in self.architectures}
+        lines = text.splitlines()
+        arch = None
+
+        for i, line in enumerate(lines):
+            if not line or line.startswith("Generated:"):
+                continue
+            # Architecture section header: name line followed by '====' underline
+            if i + 1 < len(lines) and lines[i + 1].startswith("===="):
+                arch = line
+                continue
+            # Separator lines
+            if line.startswith("====") or line.startswith("----"):
+                continue
+            # Subsection header lines always contain spaces; package names never do
+            if " " in line:
+                continue
+            # Last word of a multi-line subsection header is followed by '----'
+            if i + 1 < len(lines) and lines[i + 1].startswith("----"):
+                continue
+            # Remaining lines are package names
+            if arch and arch in counts_by_arch:
+                counts_by_arch[arch] += 1
+
+        for arch, count in counts_by_arch.items():
+            data.append(
+                {
+                    "measurement": "priority_mismatch_stats",
+                    "tags": {"release": self.dev_series, "arch": arch},
+                    "time": generated_time,
+                    "fields": {"count": count},
+                }
+            )
+        return data
+
     def get_bug_stats(self):
         data = []
         self.log.debug("Getting bug stats for ubuntu-archive team")
@@ -204,5 +272,6 @@ class UbuntuArchiveMetrics(Metric):
         nbs = self.get_nbs_stats()
         uninst = self.get_uninst_stats()
         outdate = self.get_outdate_stats()
+        priority_mismatches = self.get_priority_mismatch_stats()
         bugs = self.get_bug_stats()
-        return nbs + uninst + outdate + bugs
+        return nbs + uninst + outdate + priority_mismatches + bugs
