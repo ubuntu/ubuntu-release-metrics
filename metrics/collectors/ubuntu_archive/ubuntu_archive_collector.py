@@ -9,6 +9,7 @@ import time
 from datetime import datetime, timezone
 from launchpadlib.launchpad import Launchpad
 from metrics.lib.basemetric import Metric
+from metrics.lib.lp_scrape_mps import count_team_reviews
 
 NBS_CSV_URL = "https://ubuntu-archive-team.ubuntu.com/nbs.csv"
 PROPOSED_MIGRATION_URL = "https://ubuntu-archive-team.ubuntu.com/proposed-migration/"
@@ -229,6 +230,21 @@ class UbuntuArchiveMetrics(Metric):
             )
         return data
 
+    def get_review_stats(self):
+        data = []
+        self.log.debug("Getting review stats for ubuntu-archive team")
+        try:
+            count = count_team_reviews("ubuntu-archive")
+            data.append(
+                {
+                    "measurement": "ubuntu_archive_reviews",
+                    "fields": {"count": count},
+                }
+            )
+        except Exception as exc:
+            self.log.warning("Failed to fetch review stats for ubuntu-archive: %s", exc)
+        return data
+
     def get_bug_stats(self):
         data = []
         self.log.debug("Getting bug stats for ubuntu-archive team")
@@ -273,5 +289,6 @@ class UbuntuArchiveMetrics(Metric):
         uninst = self.get_uninst_stats()
         outdate = self.get_outdate_stats()
         priority_mismatches = self.get_priority_mismatch_stats()
+        reviews = self.get_review_stats()
         bugs = self.get_bug_stats()
-        return nbs + uninst + outdate + priority_mismatches + bugs
+        return nbs + uninst + outdate + reviews + priority_mismatches + bugs
