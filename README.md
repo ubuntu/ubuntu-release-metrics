@@ -45,6 +45,69 @@ But when starting a new metric, just copy the structure of an existing script!
 The `metrics` branch is auto pulled, so after merging your new collector will
 be run automatically.
 
+## Existing collectors
+
+* **Autopkgtest** (`metrics.collectors.autopkgtest`) — every 5m
+
+  Queue sizes and running test counts from autopkgtest servers (production and staging), indexed by context, release, architecture, and instance.
+  - `autopkgtest_queue_size`
+  - `autopkgtest_running`
+
+* **Britney** (`metrics.collectors.britney`) — every 5m
+
+  Britney migration tool metrics: last run age, run duration, and update_excuses statistics.
+  - `britney_last_run_age` — hours since last run
+  - `britney_last_run_duration` — run duration in minutes
+  - `update_excuses_stats` — valid candidates, not considered, total, median age, backlog
+  - `update_excuses_by_team_stats` — count and average age of packages stuck >3 days, per team
+
+* **Command Not Found** (`metrics.collectors.cnf`) — every 5m
+
+  Command Not Found index age for each release, with an out-of-date flag when older than 1 day.
+  - `command_not_found_age`
+
+* **Contributors** (`metrics.collectors.contributors`) — every 1h
+
+  Launchpad team member and participant counts for key Ubuntu teams (e.g. motu, ubuntu-core-dev, ubuntu-release, ubuntu-sru).
+  - `launchpad_team_members`
+
+* **Images** (`metrics.collectors.images`) — every 5m
+
+  Daily Ubuntu image age and size, indexed by flavor, release, architecture, and image type.
+  - `daily_image_details`
+
+* **RLS Bugs** (`metrics.collectors.rls_bugs`) — every 1h
+
+  Release bug tracking statistics split by incoming vs. tracking tags, indexed by team and release codename.
+  - `distro_rls_bug_tasks`
+
+* **Sponsoring** (`metrics.collectors.sponsoring`) — every 5m
+
+  Sponsoring queue statistics: count, oldest age, and average age (in days), indexed by report type.
+  - `sponsoring_queue_stats`
+
+* **Ubuntu Archive** (`metrics.collectors.ubuntu_archive`) — every 1h
+
+  Archive metrics for the development series, sourced from ubuntu-archive-team reports and Launchpad.
+  - `nbs_stats` — Not Built from Source packages: removable and total counts
+  - `uninst_stats` — uninstallable package counts per architecture
+  - `outdate_stats` — outdated package counts per architecture
+  - `priority_mismatch_stats` — priority mismatch package counts per architecture
+  - `ubuntu_archive_reviews` — review count for the ubuntu-archive team
+  - `ubuntu_archive_bugs` — bug counts subscribed to and assigned to the ubuntu-archive team
+
+* **Upload Queues** (`metrics.collectors.upload_queues`) — every 5m
+
+  Package upload queue sizes by status and pocket, new queue splits by type, and queue ages.
+  - `ubuntu_queue_size`
+  - `ubuntu_new_queue_size`
+  - `queue_ages` — oldest entry and 10-day backlog count
+
+* **Versions** (`metrics.collectors.versions`) — every 1h
+
+  Version statistics from desktop reports, including various categories and their counts for the devel series.
+  - `versions_script_stats`
+
 ## Controlling how often metrics are collected
 
 The charm will handle arranging for each metric to be run periodically, but
