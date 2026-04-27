@@ -12,6 +12,10 @@ from metrics.lib.basemetric import Metric
 from metrics.lib.lp_scrape_mps import count_team_reviews
 
 NBS_CSV_URL = "https://ubuntu-archive-team.ubuntu.com/nbs.csv"
+COMPONENT_MISMATCHES_CSV_URLS = {
+    "release": "https://ubuntu-archive-team.ubuntu.com/component-mismatches.csv",
+    "proposed": "https://ubuntu-archive-team.ubuntu.com/component-mismatches-proposed.csv",
+}
 PROPOSED_MIGRATION_URL = "https://ubuntu-archive-team.ubuntu.com/proposed-migration/"
 PRIORITY_MISMATCHES_URL = (
     "https://ubuntu-archive-team.ubuntu.com/priority-mismatches.txt"
@@ -35,70 +39,125 @@ class UbuntuArchiveMetrics(Metric):
             arch.architecture_tag for arch in self.ubuntu.current_series.architectures
         ]
 
+    def _fetch_recent_csv_lines(self, url, buffer_size=2048):
+        """Fetch the tail of a CSV via a Range request and return parsed lines.
+
+        For a 206 partial response the first line is discarded as it is likely
+        a fragment.  For a 200 full response all lines are kept.  Returns an
+        empty list on network or unexpected-status errors.
+        """
+        try:
+            headers = {"Range": f"bytes=-{buffer_size}"}
+            response = requests.get(url, headers=headers, timeout=60)
+            response.raise_for_status()
+        except requests.exceptions.RequestException as exc:
+            self.log.warning("Failed to download CSV from %s: %s", url, exc)
+            return []
+
+        lines = response.text.strip().splitlines()
+        status_code = response.status_code
+
+        if status_code == 206:
+            # The first line of a partial response is almost always a fragment.
+            if len(lines) > 1:
+                lines = lines[1:]
+        elif status_code == 200:
+            # Server ignored the Range header; keep all lines.
+            self.log.debug("Received full CSV from %s (status 200)", url)
+        else:
+            self.log.warning(
+                "Unexpected status code %s when requesting CSV from %s",
+                status_code,
+                url,
+            )
+            return []
+
+        return lines
+
     def get_nbs_stats(self):
         data = []
-        self.log.debug("Getting NBS stats for " + self.dev_series)
-        self.log.debug("Downloading tail of NBS CSV...")
+        self.log.debug("Getting NBS stats for %s", self.dev_series)
 
-        try:
-            # 2KB is a safe buffer for text to ensure 12h of records
-            headers = {"Range": "bytes=-2048"}
-            response = requests.get(NBS_CSV_URL, headers=headers, timeout=60)
+        lines = self._fetch_recent_csv_lines(NBS_CSV_URL)
+        if not lines:
+            return []
 
-            # we expect 200 or 206 for a Range request; anything else is a problem
-            response.raise_for_status()
+        now_ms = int(time.time() * 1000)
+        cutoff = now_ms - (12 * 60 * 60 * 1000)  # 12h safety period
 
-            self.log.debug("Parsing NBS CSV fragment...")
-            lines = response.text.strip().splitlines()
+        for line in lines:
+            parts = line.split(",")
+            if len(parts) != 3:
+                continue
+            try:
+                ts = int(parts[0])
+                if ts > cutoff:
+                    data.append(
+                        {
+                            "measurement": "nbs_stats",
+                            "tags": {"release": self.dev_series},
+                            "time": datetime.fromtimestamp(
+                                ts / 1000.0, tz=timezone.utc
+                            ),
+                            "fields": {
+                                "removable": int(parts[1]),
+                                "total": int(parts[2]),
+                            },
+                        }
+                    )
+            except ValueError as exc:
+                self.log.debug("Skipping line due to parse error: %s", exc)
+                continue
 
-            status_code = response.status_code
-            if status_code == 206:
-                # The first line of a partial Range response is almost always
-                # a partial fragment. We discard it to avoid ValueErrors.
-                if len(lines) > 1:
-                    lines = lines[1:]
-            elif status_code == 200:
-                # Server ignored the Range header and returned the full file.
-                # Keep all lines, including the first one.
-                self.log.debug("Received full NBS CSV (status 200); keeping all lines.")
-            else:
-                # Unexpected 2xx status for a Range request.
-                self.log.warning(
-                    "Unexpected status code %s when requesting NBS CSV", status_code
-                )
-                return []
+        return data
 
-            now_ms = int(time.time() * 1000)
-            cutoff = now_ms - (12 * 60 * 60 * 1000)  # 12h safety period
+    def get_component_mismatch_stats(self):
+        data = []
+        now_ms = int(time.time() * 1000)
+        cutoff = now_ms - (12 * 60 * 60 * 1000)  # 12h safety period
+
+        # Columns: time, source promotions, binary promotions,
+        #          source demotions, binary demotions
+        column_tags = [
+            {"action": "promotion", "type": "source"},
+            {"action": "promotion", "type": "binary"},
+            {"action": "demotion", "type": "source"},
+            {"action": "demotion", "type": "binary"},
+        ]
+
+        for pocket, url in COMPONENT_MISMATCHES_CSV_URLS.items():
+            self.log.debug(
+                "Getting component mismatch stats for %s (pocket: %s)",
+                self.dev_series,
+                pocket,
+            )
+            lines = self._fetch_recent_csv_lines(url)
 
             for line in lines:
                 parts = line.split(",")
-                if len(parts) != 3:
+                if len(parts) != 5:
                     continue
-
                 try:
                     ts = int(parts[0])
-                    if ts > cutoff:
-                        # Convert ms to datetime for InfluxDB precision
+                    if ts <= cutoff:
+                        continue
+                    timestamp = datetime.fromtimestamp(ts / 1000.0, tz=timezone.utc)
+                    for i, tags in enumerate(column_tags):
                         data.append(
                             {
-                                "measurement": "nbs_stats",
-                                "tags": {"release": self.dev_series},
-                                "time": datetime.fromtimestamp(
-                                    ts / 1000.0, tz=timezone.utc
-                                ),
-                                "fields": {
-                                    "removable": int(parts[1]),
-                                    "total": int(parts[2]),
+                                "measurement": "component_mismatch_stats",
+                                "tags": {
+                                    "release": self.dev_series,
+                                    "pocket": pocket,
+                                    **tags,
                                 },
+                                "time": timestamp,
+                                "fields": {"count": int(parts[i + 1])},
                             }
                         )
                 except ValueError as exc:
                     self.log.debug("Skipping line due to parse error: %s", exc)
                     continue
-        except requests.exceptions.RequestException as exc:
-            self.log.warning("Failed to download or parse NBS CSV: %s", exc)
-            return []
 
         return data
 
@@ -289,6 +348,15 @@ class UbuntuArchiveMetrics(Metric):
         uninst = self.get_uninst_stats()
         outdate = self.get_outdate_stats()
         priority_mismatches = self.get_priority_mismatch_stats()
+        component_mismatches = self.get_component_mismatch_stats()
         reviews = self.get_review_stats()
         bugs = self.get_bug_stats()
-        return nbs + uninst + outdate + reviews + priority_mismatches + bugs
+        return (
+            nbs
+            + uninst
+            + outdate
+            + priority_mismatches
+            + component_mismatches
+            + reviews
+            + bugs
+        )
