@@ -6,9 +6,9 @@ from collections import defaultdict
 
 from metrics.lib.basemetric import Metric
 
-QUEUE_SIZE_URL = {
-    "production": "https://autopkgtest.ubuntu.com/queue_size.json",
-    "staging": "https://autopkgtest.staging.ubuntu.com/queue_size.json",
+QUEUE_URL = {
+    "production": "https://autopkgtest.ubuntu.com/queues.json",
+    "staging": "https://autopkgtest.staging.ubuntu.com/queues.json",
 }
 
 RUNNING_URL = {
@@ -28,18 +28,18 @@ class AutopkgtestMetrics(Metric):
     def collect_queue_sizes(self):
         data = []
         for instance in ("production", "staging"):
-            queue_sizes = self.fetch(QUEUE_SIZE_URL[instance])
-            if not queue_sizes:
+            queues = self.fetch(QUEUE_URL[instance])
+            if not queues:
                 continue
-            for context in queue_sizes:
-                for release in queue_sizes[context]:
-                    for arch, count in queue_sizes[context][release].items():
+            for queue in queues:
+                for release in queues[queue]:
+                    for arch, items in queues[queue][release].items():
                         data.append(
                             {
                                 "measurement": "autopkgtest_queue_size",
-                                "fields": {"count": count},
+                                "fields": {"count": len(items)},
                                 "tags": {
-                                    "context": context,
+                                    "context": queue,
                                     "release": release,
                                     "arch": arch,
                                     "instance": instance,
