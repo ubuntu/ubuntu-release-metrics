@@ -9,13 +9,7 @@ from launchpadlib.launchpad import Launchpad
 
 from metrics.lib.basemetric import Metric
 
-RSYNC_SERVER_REQUESTS = [
-    "rsync://cdimage.ubuntu.com/cdimage/daily*/*/*",
-    "rsync://cdimage.ubuntu.com/cdimage/*/daily*/*/*",
-    "rsync://cdimage.ubuntu.com/cdimage/*/dvd/*/*",
-    "rsync://cdimage.ubuntu.com/cdimage/*/*/daily*/*/*",
-    "rsync://cdimage.ubuntu.com/cdimage/*/*/dvd/*/*",
-]
+RSYNC_SERVER_REQUEST = "rsync://cdimage.ubuntu.com/cdimage/"
 IMAGE_FORMATS = [".iso", ".img.xz", ".wsl"]
 
 UBUNTUSTUDIO_DVD_RELEASES = ["jammy", "noble"]
@@ -35,29 +29,29 @@ class ImagesMetrics(Metric):
         self.active_series = {s.name: s for s in self.ubuntu.series if s.active}
         self.date_now = datetime.datetime.now()
 
-    def rsync_list_images(self):
-        rsync = ""
-        for url in RSYNC_SERVER_REQUESTS:
-            for img in IMAGE_FORMATS:
-                try:
-                    self.log.debug("Rsync listing %s%s", url, img)
-                    rsync += subprocess.check_output(
-                        [
-                            "rsync",
-                            "-4",
-                            "--dry-run",
-                            "-RL",
-                            "--out-format='%l %M %f'",
-                            "--archive",
-                            "%s" % url + img,
-                            "/tmp",
-                        ],
-                        text=True,
-                        timeout=10,  # 10s is already plenty!
-                    )
-                except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
-                    self.log.error("rsync call failed: %s", e.output)
-        return rsync
+    def rsync_list_images(self) -> list[str]:
+        self.log.debug("Rsync listing %s", RSYNC_SERVER_REQUEST)
+        rsync = subprocess.run(
+            [
+                "rsync",
+                "-4",
+                "--dry-run",
+                "--relative",
+                "--copy-links",
+                "--out-format=%l %M %f",
+                "--archive",
+                RSYNC_SERVER_REQUEST,
+                "/tmp",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        lines = []
+        for line in rsync.stdout.splitlines():
+            if any(line.endswith(ext) for ext in IMAGE_FORMATS):
+                lines.append(line)
+        return lines
 
     def collect(self):
         """Collect the daily images details"""
@@ -65,9 +59,8 @@ class ImagesMetrics(Metric):
 
         rsync_cmd_output = self.rsync_list_images()
 
-        for rsyncline in rsync_cmd_output.splitlines():
-            if not any(ext in rsyncline for ext in IMAGE_FORMATS):
-                continue
+        for rsyncline in rsync_cmd_output:
+            self.log.debug("parsing rsync line '%s'", rsyncline)
             if "current" in rsyncline or "pending" in rsyncline:
                 # the format is specific in the rsync call '%l %M %f'
                 size, mtime, path = rsyncline.strip("'").split()
@@ -79,22 +72,9 @@ class ImagesMetrics(Metric):
 
                 # there are variations of the naming scheme so guess a bit
                 path_table = path.split("/")
-                # "ubuntu" is a convenience symlink. Everything else in there
-                # is found via other directories.
-                if path_table[0] == "ubuntu":
-                    continue
-                # the path starts with a series name then it's a desktop iso
-                elif path_table[0] in self.active_series:
-                    flavor = "ubuntu"
-                # or with 'daily-live'
-                elif (
-                    path_table[0] == "daily-live"
-                    or path_table[0] == "daily-preinstalled"
-                ):
-                    flavor = "ubuntu"
-                # otherwise it starts with the flavor
-                else:
-                    flavor = path_table[0]
+
+                # first element is the flavor/product
+                flavor = path_table[0]
 
                 # the path ends with the image filename
                 image_name = path_table[-1]
