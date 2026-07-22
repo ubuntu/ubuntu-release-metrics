@@ -1,0 +1,935 @@
+{
+  "meta": {
+    "type": "db",
+    "canSave": false,
+    "canEdit": false,
+    "canAdmin": false,
+    "canStar": true,
+    "slug": "ubuntu-cd-images",
+    "url": "/d/XgP-fUlGz/ubuntu-cd-images",
+    "expires": "0001-01-01T00:00:00Z",
+    "created": "2026-07-22T08:04:37Z",
+    "updated": "2026-07-22T08:07:18Z",
+    "updatedBy": "admin",
+    "createdBy": "admin",
+    "version": 2,
+    "hasAcl": false,
+    "isFolder": false,
+    "folderId": 0,
+    "folderTitle": "General",
+    "folderUrl": "",
+    "provisioned": false,
+    "provisionedExternalId": ""
+  },
+  "dashboard": {
+    "annotations": {
+      "list": [
+        {
+          "$$hashKey": "object:13",
+          "builtIn": 1,
+          "datasource": "-- Grafana --",
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "type": "dashboard"
+        }
+      ]
+    },
+    "editable": true,
+    "gnetId": null,
+    "graphTooltip": 0,
+    "id": 3,
+    "iteration": 1784707623782,
+    "links": [],
+    "panels": [
+      {
+        "aliasColors": {},
+        "bars": false,
+        "dashLength": 10,
+        "dashes": false,
+        "datasource": "influxdb - Juju generated source",
+        "fieldConfig": {
+          "defaults": {
+            "custom": {},
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "fill": 0,
+        "fillGradient": 0,
+        "gridPos": {
+          "h": 8,
+          "w": 24,
+          "x": 0,
+          "y": 0
+        },
+        "hiddenSeries": false,
+        "id": 6,
+        "legend": {
+          "avg": false,
+          "current": false,
+          "max": false,
+          "min": false,
+          "show": true,
+          "total": false,
+          "values": false
+        },
+        "lines": true,
+        "linewidth": 1,
+        "nullPointMode": "connected",
+        "options": {
+          "dataLinks": []
+        },
+        "percentage": false,
+        "pluginVersion": "7.0.3",
+        "pointradius": 2,
+        "points": false,
+        "renderer": "flot",
+        "seriesOverrides": [],
+        "spaceLength": 10,
+        "stack": false,
+        "steppedLine": false,
+        "targets": [
+          {
+            "alias": "$tag_flavor $tag_release $tag_architecture",
+            "groupBy": [
+              {
+                "params": [
+                  "$__interval"
+                ],
+                "type": "time"
+              },
+              {
+                "params": [
+                  "current_or_pending"
+                ],
+                "type": "tag"
+              },
+              {
+                "params": [
+                  "flavor"
+                ],
+                "type": "tag"
+              },
+              {
+                "params": [
+                  "release"
+                ],
+                "type": "tag"
+              },
+              {
+                "params": [
+                  "architecture"
+                ],
+                "type": "tag"
+              },
+              {
+                "params": [
+                  "linear"
+                ],
+                "type": "fill"
+              }
+            ],
+            "measurement": "daily_image_details",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "query": "SELECT last(\"size\") FROM \"daily_image_details\" WHERE (\"flavor\" =~ /^$flavour$/ AND \"release\" =~ /^$release$/ AND \"architecture\" != 'NULL') AND $timeFilter GROUP BY time($__interval), \"current_or_pending\", \"flavor\", \"release\", \"architecture\" fill(null)",
+            "rawQuery": false,
+            "refId": "A",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "size"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "last"
+                }
+              ]
+            ],
+            "tags": [
+              {
+                "key": "flavor",
+                "operator": "=~",
+                "value": "/^$flavour$/"
+              },
+              {
+                "condition": "AND",
+                "key": "release",
+                "operator": "=~",
+                "value": "/^$release$/"
+              },
+              {
+                "condition": "AND",
+                "key": "current_or_pending",
+                "operator": "=",
+                "value": "current"
+              }
+            ]
+          }
+        ],
+        "thresholds": [],
+        "timeFrom": null,
+        "timeRegions": [],
+        "timeShift": null,
+        "title": "CD image size",
+        "tooltip": {
+          "shared": true,
+          "sort": 0,
+          "value_type": "individual"
+        },
+        "type": "graph",
+        "xaxis": {
+          "buckets": null,
+          "mode": "time",
+          "name": null,
+          "show": true,
+          "values": []
+        },
+        "yaxes": [
+          {
+            "$$hashKey": "object:1791",
+            "format": "decbytes",
+            "label": "",
+            "logBase": 1,
+            "max": null,
+            "min": "0",
+            "show": true
+          },
+          {
+            "$$hashKey": "object:1792",
+            "format": "Data (Metric)",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": true
+          }
+        ],
+        "yaxis": {
+          "align": false,
+          "alignLevel": null
+        }
+      },
+      {
+        "cards": {
+          "cardPadding": null,
+          "cardRound": null
+        },
+        "color": {
+          "cardColor": "#b4ff00",
+          "colorScale": "sqrt",
+          "colorScheme": "interpolateYlOrRd",
+          "exponent": 0.5,
+          "max": 14,
+          "min": 0,
+          "mode": "spectrum"
+        },
+        "dataFormat": "tsbuckets",
+        "datasource": null,
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": null
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 13,
+          "w": 24,
+          "x": 0,
+          "y": 8
+        },
+        "heatmap": {},
+        "hideZeroBuckets": true,
+        "highlightCards": true,
+        "id": 4,
+        "legend": {
+          "show": true
+        },
+        "pluginVersion": "7.0.3",
+        "reverseYBuckets": true,
+        "targets": [
+          {
+            "alias": "$tag_flavor $tag_release $tag_architecture $tag_image_type",
+            "groupBy": [
+              {
+                "params": [
+                  "1d"
+                ],
+                "type": "time"
+              },
+              {
+                "params": [
+                  "flavor"
+                ],
+                "type": "tag"
+              },
+              {
+                "params": [
+                  "architecture"
+                ],
+                "type": "tag"
+              },
+              {
+                "params": [
+                  "release"
+                ],
+                "type": "tag"
+              },
+              {
+                "params": [
+                  "image_type"
+                ],
+                "type": "tag"
+              },
+              {
+                "params": [
+                  "666"
+                ],
+                "type": "fill"
+              }
+            ],
+            "hide": false,
+            "measurement": "daily_image_details",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "refId": "A",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "age"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "last"
+                }
+              ]
+            ],
+            "tags": [
+              {
+                "key": "flavor",
+                "operator": "=~",
+                "value": "/^$flavour$/"
+              },
+              {
+                "condition": "AND",
+                "key": "release",
+                "operator": "=~",
+                "value": "/^$release$/"
+              },
+              {
+                "condition": "AND",
+                "key": "current_or_pending",
+                "operator": "=",
+                "value": "pending"
+              }
+            ]
+          }
+        ],
+        "timeFrom": null,
+        "timeShift": null,
+        "title": "Age of the Ubuntu Daily Images (pending)",
+        "tooltip": {
+          "show": true,
+          "showHistogram": false
+        },
+        "type": "heatmap",
+        "xAxis": {
+          "show": true
+        },
+        "xBucketNumber": null,
+        "xBucketSize": null,
+        "yAxis": {
+          "decimals": null,
+          "format": "none",
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true,
+          "splitFactor": null
+        },
+        "yBucketBound": "middle",
+        "yBucketNumber": null,
+        "yBucketSize": null
+      },
+      {
+        "cards": {
+          "cardPadding": null,
+          "cardRound": null
+        },
+        "color": {
+          "cardColor": "#b4ff00",
+          "colorScale": "sqrt",
+          "colorScheme": "interpolateYlOrRd",
+          "exponent": 0.5,
+          "max": 14,
+          "mode": "spectrum"
+        },
+        "dataFormat": "tsbuckets",
+        "datasource": null,
+        "fieldConfig": {
+          "defaults": {
+            "custom": {}
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 11,
+          "w": 24,
+          "x": 0,
+          "y": 21
+        },
+        "heatmap": {},
+        "hideZeroBuckets": true,
+        "highlightCards": true,
+        "id": 7,
+        "legend": {
+          "show": true
+        },
+        "reverseYBuckets": true,
+        "targets": [
+          {
+            "alias": "$tag_flavor $tag_release $tag_architecture $tag_image_type",
+            "groupBy": [
+              {
+                "params": [
+                  "1d"
+                ],
+                "type": "time"
+              },
+              {
+                "params": [
+                  "flavor"
+                ],
+                "type": "tag"
+              },
+              {
+                "params": [
+                  "architecture"
+                ],
+                "type": "tag"
+              },
+              {
+                "params": [
+                  "release"
+                ],
+                "type": "tag"
+              },
+              {
+                "params": [
+                  "image_type"
+                ],
+                "type": "tag"
+              },
+              {
+                "params": [
+                  "666"
+                ],
+                "type": "fill"
+              }
+            ],
+            "measurement": "daily_image_details",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "refId": "A",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "age"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "last"
+                }
+              ]
+            ],
+            "tags": [
+              {
+                "key": "flavor",
+                "operator": "=~",
+                "value": "/^$flavour$/"
+              },
+              {
+                "condition": "AND",
+                "key": "release",
+                "operator": "=~",
+                "value": "/^$release$/"
+              },
+              {
+                "condition": "AND",
+                "key": "current_or_pending",
+                "operator": "=",
+                "value": "current"
+              }
+            ]
+          }
+        ],
+        "timeFrom": null,
+        "timeShift": null,
+        "title": "Age of the Ubuntu Daily Images (current)",
+        "tooltip": {
+          "show": true,
+          "showHistogram": false
+        },
+        "type": "heatmap",
+        "xAxis": {
+          "show": true
+        },
+        "xBucketNumber": null,
+        "xBucketSize": null,
+        "yAxis": {
+          "decimals": null,
+          "format": "none",
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true,
+          "splitFactor": null
+        },
+        "yBucketBound": "middle",
+        "yBucketNumber": null,
+        "yBucketSize": null
+      },
+      {
+        "aliasColors": {},
+        "bars": false,
+        "dashLength": 10,
+        "dashes": false,
+        "datasource": "influxdb - Juju generated source",
+        "fieldConfig": {
+          "defaults": {
+            "custom": {},
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "fill": 0,
+        "fillGradient": 0,
+        "gridPos": {
+          "h": 8,
+          "w": 24,
+          "x": 0,
+          "y": 32
+        },
+        "hiddenSeries": false,
+        "id": 8,
+        "legend": {
+          "avg": false,
+          "current": false,
+          "max": false,
+          "min": false,
+          "show": true,
+          "total": false,
+          "values": false
+        },
+        "lines": true,
+        "linewidth": 1,
+        "nullPointMode": "connected",
+        "options": {
+          "dataLinks": []
+        },
+        "percentage": false,
+        "pluginVersion": "7.0.3",
+        "pointradius": 2,
+        "points": false,
+        "renderer": "flot",
+        "seriesOverrides": [],
+        "spaceLength": 10,
+        "stack": false,
+        "steppedLine": false,
+        "targets": [
+          {
+            "alias": "$tag_flavor $tag_release $tag_architecture",
+            "groupBy": [
+              {
+                "params": [
+                  "$__interval"
+                ],
+                "type": "time"
+              },
+              {
+                "params": [
+                  "current_or_pending"
+                ],
+                "type": "tag"
+              },
+              {
+                "params": [
+                  "flavor"
+                ],
+                "type": "tag"
+              },
+              {
+                "params": [
+                  "release"
+                ],
+                "type": "tag"
+              },
+              {
+                "params": [
+                  "architecture"
+                ],
+                "type": "tag"
+              },
+              {
+                "params": [
+                  "linear"
+                ],
+                "type": "fill"
+              }
+            ],
+            "measurement": "daily_image_details",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "query": "SELECT last(\"size\") FROM \"daily_image_details\" WHERE (\"flavor\" =~ /^$flavour$/ AND \"release\" =~ /^$release$/ AND \"architecture\" != 'NULL') AND $timeFilter GROUP BY time($__interval), \"current_or_pending\", \"flavor\", \"release\", \"architecture\" fill(null)",
+            "rawQuery": false,
+            "refId": "A",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "size"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "last"
+                },
+                {
+                  "params": [
+                    "$__interval"
+                  ],
+                  "type": "derivative"
+                }
+              ]
+            ],
+            "tags": [
+              {
+                "key": "flavor",
+                "operator": "=~",
+                "value": "/^$flavour$/"
+              },
+              {
+                "condition": "AND",
+                "key": "release",
+                "operator": "=~",
+                "value": "/^$release$/"
+              },
+              {
+                "condition": "AND",
+                "key": "current_or_pending",
+                "operator": "=",
+                "value": "current"
+              }
+            ]
+          }
+        ],
+        "thresholds": [],
+        "timeFrom": null,
+        "timeRegions": [],
+        "timeShift": null,
+        "title": "CD image size delta (development)",
+        "tooltip": {
+          "shared": true,
+          "sort": 0,
+          "value_type": "individual"
+        },
+        "type": "graph",
+        "xaxis": {
+          "buckets": null,
+          "mode": "time",
+          "name": null,
+          "show": true,
+          "values": []
+        },
+        "yaxes": [
+          {
+            "$$hashKey": "object:1791",
+            "format": "decbytes",
+            "label": "",
+            "logBase": 1,
+            "max": null,
+            "min": "0",
+            "show": true
+          },
+          {
+            "$$hashKey": "object:1792",
+            "format": "Data (Metric)",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": true
+          }
+        ],
+        "yaxis": {
+          "align": false,
+          "alignLevel": null
+        }
+      }
+    ],
+    "refresh": false,
+    "schemaVersion": 22,
+    "style": "dark",
+    "tags": [],
+    "templating": {
+      "list": [
+        {
+          "allValue": null,
+          "current": {
+            "tags": [],
+            "text": "stonking",
+            "value": [
+              "stonking"
+            ]
+          },
+          "datasource": "influxdb - Juju generated source",
+          "definition": "SHOW TAG VALUES FROM daily_image_details WITH KEY = \"release\"",
+          "hide": 0,
+          "includeAll": false,
+          "index": -1,
+          "label": null,
+          "multi": true,
+          "name": "release",
+          "options": [],
+          "query": "SHOW TAG VALUES FROM daily_image_details WITH KEY = \"release\"",
+          "refresh": 1,
+          "regex": "",
+          "skipUrlSync": false,
+          "sort": 2,
+          "tagValuesQuery": "",
+          "tags": [],
+          "tagsQuery": "",
+          "type": "query",
+          "useTags": false
+        },
+        {
+          "allValue": null,
+          "current": {
+            "selected": false,
+            "text": "All",
+            "value": [
+              "$__all"
+            ]
+          },
+          "datasource": "influxdb - Juju generated source",
+          "definition": "SHOW TAG VALUES FROM daily_image_details WITH KEY = \"flavor\"",
+          "hide": 0,
+          "includeAll": true,
+          "index": -1,
+          "label": null,
+          "multi": true,
+          "name": "flavour",
+          "options": [
+            {
+              "selected": true,
+              "text": "All",
+              "value": "$__all"
+            },
+            {
+              "selected": false,
+              "text": "daily-canary",
+              "value": "daily-canary"
+            },
+            {
+              "selected": false,
+              "text": "daily-legacy",
+              "value": "daily-legacy"
+            },
+            {
+              "selected": false,
+              "text": "daily-preinstalled",
+              "value": "daily-preinstalled"
+            },
+            {
+              "selected": false,
+              "text": "daily-preinstalled-preinstalled",
+              "value": "daily-preinstalled-preinstalled"
+            },
+            {
+              "selected": false,
+              "text": "edubuntu",
+              "value": "edubuntu"
+            },
+            {
+              "selected": false,
+              "text": "experimental",
+              "value": "experimental"
+            },
+            {
+              "selected": false,
+              "text": "kubuntu",
+              "value": "kubuntu"
+            },
+            {
+              "selected": false,
+              "text": "lubuntu",
+              "value": "lubuntu"
+            },
+            {
+              "selected": false,
+              "text": "ubuntu",
+              "value": "ubuntu"
+            },
+            {
+              "selected": false,
+              "text": "ubuntu-budgie",
+              "value": "ubuntu-budgie"
+            },
+            {
+              "selected": false,
+              "text": "ubuntu-core-installer",
+              "value": "ubuntu-core-installer"
+            },
+            {
+              "selected": false,
+              "text": "ubuntu-mate",
+              "value": "ubuntu-mate"
+            },
+            {
+              "selected": false,
+              "text": "ubuntu-mini-iso",
+              "value": "ubuntu-mini-iso"
+            },
+            {
+              "selected": false,
+              "text": "ubuntu-preinstalled",
+              "value": "ubuntu-preinstalled"
+            },
+            {
+              "selected": false,
+              "text": "ubuntu-server",
+              "value": "ubuntu-server"
+            },
+            {
+              "selected": false,
+              "text": "ubuntu-server-preinstalled",
+              "value": "ubuntu-server-preinstalled"
+            },
+            {
+              "selected": false,
+              "text": "ubuntu-unity",
+              "value": "ubuntu-unity"
+            },
+            {
+              "selected": false,
+              "text": "ubuntu-wsl",
+              "value": "ubuntu-wsl"
+            },
+            {
+              "selected": false,
+              "text": "ubuntucinnamon",
+              "value": "ubuntucinnamon"
+            },
+            {
+              "selected": false,
+              "text": "ubuntukylin",
+              "value": "ubuntukylin"
+            },
+            {
+              "selected": false,
+              "text": "ubuntustudio",
+              "value": "ubuntustudio"
+            },
+            {
+              "selected": false,
+              "text": "xubuntu",
+              "value": "xubuntu"
+            }
+          ],
+          "query": "SHOW TAG VALUES FROM daily_image_details WITH KEY = \"flavor\"",
+          "refresh": 0,
+          "regex": "",
+          "skipUrlSync": false,
+          "sort": 0,
+          "tagValuesQuery": "",
+          "tags": [],
+          "tagsQuery": "",
+          "type": "query",
+          "useTags": false
+        }
+      ]
+    },
+    "time": {
+      "from": "now-30d",
+      "to": "now"
+    },
+    "timepicker": {
+      "refresh_intervals": [
+        "10s",
+        "30s",
+        "1m",
+        "5m",
+        "15m",
+        "30m",
+        "1h",
+        "2h",
+        "1d"
+      ]
+    },
+    "timezone": "",
+    "title": "Ubuntu CD images",
+    "uid": "XgP-fUlGz",
+    "variables": {
+      "list": []
+    },
+    "version": 2
+  }
+}
