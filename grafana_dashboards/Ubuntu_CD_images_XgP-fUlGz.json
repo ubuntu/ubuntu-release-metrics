@@ -9,10 +9,10 @@
     "url": "/d/XgP-fUlGz/ubuntu-cd-images",
     "expires": "0001-01-01T00:00:00Z",
     "created": "2026-07-22T08:04:37Z",
-    "updated": "2026-07-22T08:07:18Z",
+    "updated": "2026-07-22T10:54:00Z",
     "updatedBy": "admin",
     "createdBy": "admin",
-    "version": 2,
+    "version": 3,
     "hasAcl": false,
     "isFolder": false,
     "folderId": 0,
@@ -40,7 +40,7 @@
     "gnetId": null,
     "graphTooltip": 0,
     "id": 3,
-    "iteration": 1784707623782,
+    "iteration": 1784717517677,
     "links": [],
     "panels": [
       {
@@ -412,7 +412,7 @@
           "overrides": []
         },
         "gridPos": {
-          "h": 11,
+          "h": 13,
           "w": 24,
           "x": 0,
           "y": 21
@@ -564,7 +564,7 @@
           "h": 8,
           "w": 24,
           "x": 0,
-          "y": 32
+          "y": 34
         },
         "hiddenSeries": false,
         "id": 8,
@@ -930,6 +930,6 @@
     "variables": {
       "list": []
     },
-    "version": 2
+    "version": 3
   }
 }
