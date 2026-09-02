@@ -87,6 +87,11 @@ class ImagesMetrics(Metric):
                     if starts_with_daily or part_of_path == "dvd":
                         image_type = part_of_path.replace("daily-", "")
                         break
+
+                # let's filter out hidden files that sometimes show up
+                if image_name.startswith("."):
+                    continue
+
                 # let's filter out old ubuntu-core-16 images
                 if image_name.startswith("ubuntu-core-16"):
                     continue
