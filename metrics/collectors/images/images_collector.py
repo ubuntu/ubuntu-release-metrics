@@ -10,7 +10,7 @@ from launchpadlib.launchpad import Launchpad
 from metrics.lib.basemetric import Metric
 
 RSYNC_SERVER_REQUEST = "rsync://cdimage.ubuntu.com/cdimage/"
-IMAGE_FORMATS = [".iso", ".img.xz", ".wsl"]
+IMAGE_FORMATS = [".iso", ".img.xz", ".tar.gz", ".wsl"]
 
 UBUNTUSTUDIO_DVD_RELEASES = ["jammy", "noble"]
 
