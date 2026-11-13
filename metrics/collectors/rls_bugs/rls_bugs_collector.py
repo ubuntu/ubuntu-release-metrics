@@ -1,5 +1,11 @@
 # Copyright 2020 Canonical Ltd
 
+# NOTE: This collector is currently disabled. Its data source,
+# reports.qa.ubuntu.com, has been decommissioned, so collect() is a no-op
+# returning no data. To re-enable this collector, it needs to be ported to
+# a different data source (e.g. the Launchpad API, or whatever replaces the
+# QA reports going forward).
+
 import json
 import urllib.request
 from collections import defaultdict
@@ -30,6 +36,16 @@ class ReleaseBugsMetrics(Metric):
             yield (release.codename, pattern.format(release.codename[0] * n))
 
     def collect(self):
+        # Disabled: reports.qa.ubuntu.com has been decommissioned. See the
+        # module-level note above for what's needed to re-enable this.
+        self.log.warning(
+            "ReleaseBugsMetrics is disabled: reports.qa.ubuntu.com is "
+            "decommissioned and this collector needs to be ported to a "
+            "new data source."
+        )
+        return []
+
+    def _collect_from_qa_reports(self):
         # incoming/tracking -> team -> release -> n
         counts = {
             "incoming": defaultdict(lambda: defaultdict(int)),

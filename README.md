@@ -76,10 +76,14 @@ be run automatically.
   Daily Ubuntu image age and size, indexed by flavor, release, architecture, and image type.
   - `daily_image_details`
 
-* **RLS Bugs** (`metrics.collectors.rls_bugs`) — every 1h
+* **RLS Bugs** (`metrics.collectors.rls_bugs`) — every 1h — **currently disabled**
 
   Release bug tracking statistics split by incoming vs. tracking tags, indexed by team and release codename.
   - `distro_rls_bug_tasks`
+
+  Disabled because its data source, reports.qa.ubuntu.com, has been
+  decommissioned. Needs to be ported to a different source (e.g. the
+  Launchpad API) before it can be re-enabled.
 
 * **Sponsoring** (`metrics.collectors.sponsoring`) — every 5m
 
