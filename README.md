@@ -94,6 +94,7 @@ be run automatically.
   - `outdate_stats` — outdated package counts per architecture
   - `priority_mismatch_stats` — priority mismatch package counts per architecture
   - `component_mismatch_stats` — component mismatch counts per pocket (`release`, `proposed`), action (`promotion`, `demotion`), and type (`source`, `binary`)
+  - `package_counts` — source package counts per component (`main`, `restricted`, `universe`, `multiverse`, `total`)
   - `ubuntu_archive_reviews` — review count for the ubuntu-archive team
   - `ubuntu_archive_bugs` — bug counts subscribed to and assigned to the ubuntu-archive team
 
