@@ -11,14 +11,17 @@ from launchpadlib.launchpad import Launchpad
 from metrics.lib.basemetric import Metric
 from metrics.lib.lp_scrape_mps import count_team_reviews
 
-NBS_CSV_URL = "https://ubuntu-archive-team.ubuntu.com/nbs.csv"
+NBS_CSV_URL = "https://static-reports.ubuntu.com/nbs/nbs.csv"
 COMPONENT_MISMATCHES_CSV_URLS = {
-    "release": "https://ubuntu-archive-team.ubuntu.com/component-mismatches.csv",
-    "proposed": "https://ubuntu-archive-team.ubuntu.com/component-mismatches-proposed.csv",
+    "release": "https://static-reports.ubuntu.com/mismatches/component-mismatches.csv",
+    "proposed": (
+        "https://static-reports.ubuntu.com/mismatches/component-mismatches-proposed.csv"
+    ),
 }
+# TODO: update once proposed migration has a new URL
 PROPOSED_MIGRATION_URL = "https://ubuntu-archive-team.ubuntu.com/proposed-migration/"
 PRIORITY_MISMATCHES_URL = (
-    "https://ubuntu-archive-team.ubuntu.com/priority-mismatches.txt"
+    "https://static-reports.ubuntu.com/mismatches/priority-mismatches.txt"
 )
 
 
