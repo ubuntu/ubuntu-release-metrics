@@ -20,6 +20,7 @@ PROPOSED_MIGRATION_URL = "https://ubuntu-archive-team.ubuntu.com/proposed-migrat
 PRIORITY_MISMATCHES_URL = (
     "https://ubuntu-archive-team.ubuntu.com/priority-mismatches.txt"
 )
+ARCHIVE_COMPONENTS = ["main", "restricted", "universe", "multiverse"]
 
 
 class UbuntuArchiveMetrics(Metric):
@@ -35,6 +36,7 @@ class UbuntuArchiveMetrics(Metric):
         self.ubuntu = self.lp.distributions["ubuntu"]
         self.active_series = {s.name: s for s in self.ubuntu.series if s.active}
         self.dev_series = self.ubuntu.current_series.name
+        self.archive = self.ubuntu.main_archive
         self.architectures = [
             arch.architecture_tag for arch in self.ubuntu.current_series.architectures
         ]
@@ -216,6 +218,52 @@ class UbuntuArchiveMetrics(Metric):
             )
         return data
 
+    def _get_component_source_count(self, component):
+        try:
+            sources = self.archive.getPublishedSources(
+                distro_series=self.active_series[self.dev_series],
+                component_name=component,
+                status="Published",
+                pocket="Release",
+            )
+            return len(sources)
+        except Exception as exc:
+            self.log.warning(
+                "Failed to fetch published source count for component %s: %s",
+                component,
+                exc,
+            )
+            return None
+
+    def get_package_count_stats(self):
+        data = []
+        self.log.debug("Getting package counts for %s", self.dev_series)
+
+        total = 0
+        for component in ARCHIVE_COMPONENTS:
+            count = self._get_component_source_count(component)
+            if count is None:
+                continue
+            total += count
+            data.append(
+                {
+                    "measurement": "package_counts",
+                    "tags": {"release": self.dev_series, "component": component},
+                    "fields": {"count": count},
+                }
+            )
+
+        if data:
+            data.append(
+                {
+                    "measurement": "package_counts",
+                    "tags": {"release": self.dev_series, "component": "total"},
+                    "fields": {"count": total},
+                }
+            )
+
+        return data
+
     def get_uninst_stats(self):
         url = PROPOSED_MIGRATION_URL + f"{self.dev_series}_uninst.txt"
         return self._get_byarch_report_stats(url, "uninst_stats")
@@ -351,6 +399,7 @@ class UbuntuArchiveMetrics(Metric):
         component_mismatches = self.get_component_mismatch_stats()
         reviews = self.get_review_stats()
         bugs = self.get_bug_stats()
+        package_counts = self.get_package_count_stats()
         return (
             nbs
             + uninst
@@ -359,4 +408,5 @@ class UbuntuArchiveMetrics(Metric):
             + component_mismatches
             + reviews
             + bugs
+            + package_counts
         )
